@@ -39,6 +39,7 @@ class BackupService {
     data['paymentItems'] = await _exportTable(_db.paymentItems);
     data['maintenanceTickets'] = await _exportTable(_db.maintenanceTickets);
     data['auditLogs'] = await _exportTable(_db.auditLogs);
+    data['roomFacilities'] = await _exportTable(_db.roomFacilities);
 
     // Simpan ke file (Coba ke folder Downloads jika memungkinkan)
     Directory? dir;
@@ -112,6 +113,7 @@ class BackupService {
       await _db.transaction(() async {
         // 1. Hapus semua data (urutan penting karena foreign key)
         await _db.delete(_db.auditLogs).go();
+        await _db.delete(_db.roomFacilities).go();
         await _db.delete(_db.paymentItems).go();
         await _db.delete(_db.payments).go();
         await _db.delete(_db.invoices).go();
@@ -137,6 +139,7 @@ class BackupService {
         totalRows += await _importPaymentItems(data['paymentItems'] as List<dynamic>? ?? []);
         totalRows += await _importMaintenanceTickets(data['maintenanceTickets'] as List<dynamic>? ?? []);
         totalRows += await _importAuditLogs(data['auditLogs'] as List<dynamic>? ?? []);
+        totalRows += await _importRoomFacilities(data['roomFacilities'] as List<dynamic>? ?? []);
       });
 
       return ImportResult(
@@ -378,6 +381,23 @@ class BackupService {
               action: m['action'] as String? ?? '',
               description: m['description'] as String? ?? '',
               ipAddress: Value(m['ip_address'] as String?),
+              createdAt: Value(_parseDateTime(m['created_at']) ?? DateTime.now()),
+            ),
+          );
+    }
+    return rows.length;
+  }
+
+  Future<int> _importRoomFacilities(List<dynamic> rows) async {
+    for (final row in rows) {
+      final m = row as Map<String, dynamic>;
+      await _db.into(_db.roomFacilities).insert(
+            RoomFacilitiesCompanion.insert(
+              id: m['id'] as String? ?? '',
+              roomId: m['room_id'] as String? ?? '',
+              name: m['name'] as String? ?? '',
+              condition: m['condition'] as String? ?? 'good',
+              description: Value(m['description'] as String?),
               createdAt: Value(_parseDateTime(m['created_at']) ?? DateTime.now()),
             ),
           );

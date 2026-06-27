@@ -184,7 +184,20 @@ class AuditLogs extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-// 13. App Database Class
+// 13. Room Facilities Table
+class RoomFacilities extends Table {
+  TextColumn get id => text()();
+  TextColumn get roomId => text().references(Rooms, #id, onDelete: KeyAction.cascade)();
+  TextColumn get name => text()();
+  TextColumn get condition => text()(); // 'good', 'broken', 'needs_repair'
+  TextColumn get description => text().nullable()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+// 14. App Database Class
 @DriftDatabase(tables: [
   Organizations,
   UserProfiles,
@@ -198,12 +211,13 @@ class AuditLogs extends Table {
   PaymentItems,
   MaintenanceTickets,
   AuditLogs,
+  RoomFacilities,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -225,6 +239,7 @@ class AppDatabase extends _$AppDatabase {
             'payment_items',
             'maintenance_tickets',
             'audit_logs',
+            'room_facilities',
           ];
           for (final table in tables) {
             await m.deleteTable(table);

@@ -5,6 +5,7 @@ import 'package:kms/core/utils/currency_formatter.dart';
 import 'package:kms/core/utils/result.dart';
 import 'package:kms/features/property/domain/entities/property_entity.dart';
 import 'package:kms/features/property/domain/entities/room_entity.dart';
+import 'package:kms/features/property/domain/entities/room_facility_entity.dart';
 import 'package:kms/features/property/domain/repositories/property_repository.dart';
 
 class PropertyRepositoryImpl implements PropertyRepository {
@@ -38,6 +39,17 @@ class PropertyRepositoryImpl implements PropertyRepository {
       images: row.images != null && row.images!.isNotEmpty ? row.images!.split(',') : const [],
       facilities: row.facilities != null && row.facilities!.isNotEmpty ? row.facilities!.split(',') : const [],
       deletedAt: row.deletedAt,
+      createdAt: row.createdAt,
+    );
+  }
+
+  RoomFacilityEntity _toRoomFacilityEntity(RoomFacility row) {
+    return RoomFacilityEntity(
+      id: row.id,
+      roomId: row.roomId,
+      name: row.name,
+      condition: RoomFacilityCondition.fromString(row.condition),
+      description: row.description,
       createdAt: row.createdAt,
     );
   }
@@ -111,7 +123,28 @@ class PropertyRepositoryImpl implements PropertyRepository {
       final query = _db.select(_db.rooms)
         ..where((t) => t.propertyId.equals(propertyId) & t.deletedAt.isNull());
       final rows = await query.get();
-      return Success(rows.map(_toRoomEntity).toList());
+      
+      final List<RoomEntity> rooms = [];
+      for (final row in rows) {
+        final facQuery = _db.select(_db.roomFacilities)..where((t) => t.roomId.equals(row.id));
+        final facRows = await facQuery.get();
+        final facNames = facRows.map((f) => '${f.name} (${RoomFacilityCondition.fromString(f.condition).toReadableString()})').toList();
+        
+        rooms.add(RoomEntity(
+          id: row.id,
+          propertyId: row.propertyId,
+          roomNumber: row.roomNumber,
+          buildingName: row.buildingName,
+          floorName: row.floorName,
+          pricePerMonth: CurrencyFormatter.toRupiahDouble(row.pricePerMonth),
+          status: RoomStatus.fromString(row.status),
+          images: row.images != null && row.images!.isNotEmpty ? row.images!.split(',') : const [],
+          facilities: facNames,
+          deletedAt: row.deletedAt,
+          createdAt: row.createdAt,
+        ));
+      }
+      return Success(rooms);
     } catch (e) {
       return FailureResult(DatabaseFailure("Gagal mengambil data kamar: $e"));
     }
@@ -122,7 +155,24 @@ class PropertyRepositoryImpl implements PropertyRepository {
     try {
       final query = _db.select(_db.rooms)..where((t) => t.id.equals(id));
       final row = await query.getSingle();
-      return Success(_toRoomEntity(row));
+      
+      final facQuery = _db.select(_db.roomFacilities)..where((t) => t.roomId.equals(row.id));
+      final facRows = await facQuery.get();
+      final facNames = facRows.map((f) => '${f.name} (${RoomFacilityCondition.fromString(f.condition).toReadableString()})').toList();
+      
+      return Success(RoomEntity(
+        id: row.id,
+        propertyId: row.propertyId,
+        roomNumber: row.roomNumber,
+        buildingName: row.buildingName,
+        floorName: row.floorName,
+        pricePerMonth: CurrencyFormatter.toRupiahDouble(row.pricePerMonth),
+        status: RoomStatus.fromString(row.status),
+        images: row.images != null && row.images!.isNotEmpty ? row.images!.split(',') : const [],
+        facilities: facNames,
+        deletedAt: row.deletedAt,
+        createdAt: row.createdAt,
+      ));
     } catch (e) {
       return FailureResult(DatabaseFailure("Gagal mengambil detail kamar: $e"));
     }
@@ -274,6 +324,67 @@ class PropertyRepositoryImpl implements PropertyRepository {
       return const Success(null);
     } catch (e) {
       return FailureResult(DatabaseFailure("Gagal menghapus permanen kamar: $e"));
+    }
+  }
+
+  @override
+  Future<Result<List<RoomFacilityEntity>>> getRoomFacilities(String roomId) async {
+    try {
+      final query = _db.select(_db.roomFacilities)
+        ..where((t) => t.roomId.equals(roomId))
+        ..orderBy([(t) => OrderingTerm.asc(t.name)]);
+      final rows = await query.get();
+      return Success(rows.map(_toRoomFacilityEntity).toList());
+    } catch (e) {
+      return FailureResult(DatabaseFailure("Gagal mengambil data fasilitas: $e"));
+    }
+  }
+
+  @override
+  Future<Result<void>> addRoomFacility(RoomFacilityEntity facility) async {
+    try {
+      await _db.into(_db.roomFacilities).insert(
+            RoomFacilitiesCompanion.insert(
+              id: facility.id,
+              roomId: facility.roomId,
+              name: facility.name,
+              condition: facility.condition.toDbValue(),
+              description: Value(facility.description),
+              createdAt: Value(facility.createdAt),
+            ),
+          );
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(DatabaseFailure("Gagal menambah fasilitas kamar: $e"));
+    }
+  }
+
+  @override
+  Future<Result<void>> updateRoomFacility(RoomFacilityEntity facility) async {
+    try {
+      await _db.update(_db.roomFacilities).replace(
+            RoomFacilitiesCompanion(
+              id: Value(facility.id),
+              roomId: Value(facility.roomId),
+              name: Value(facility.name),
+              condition: Value(facility.condition.toDbValue()),
+              description: Value(facility.description),
+            ),
+          );
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(DatabaseFailure("Gagal memperbarui fasilitas kamar: $e"));
+    }
+  }
+
+  @override
+  Future<Result<void>> deleteRoomFacility(String id) async {
+    try {
+      final query = _db.delete(_db.roomFacilities)..where((t) => t.id.equals(id));
+      await query.go();
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(DatabaseFailure("Gagal menghapus fasilitas kamar: $e"));
     }
   }
 }

@@ -6141,6 +6141,419 @@ class AuditLogsCompanion extends UpdateCompanion<AuditLog> {
   }
 }
 
+class $RoomFacilitiesTable extends RoomFacilities
+    with TableInfo<$RoomFacilitiesTable, RoomFacility> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RoomFacilitiesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _roomIdMeta = const VerificationMeta('roomId');
+  @override
+  late final GeneratedColumn<String> roomId = GeneratedColumn<String>(
+    'room_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES rooms (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _conditionMeta = const VerificationMeta(
+    'condition',
+  );
+  @override
+  late final GeneratedColumn<String> condition = GeneratedColumn<String>(
+    'condition',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    roomId,
+    name,
+    condition,
+    description,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'room_facilities';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<RoomFacility> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('room_id')) {
+      context.handle(
+        _roomIdMeta,
+        roomId.isAcceptableOrUnknown(data['room_id']!, _roomIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_roomIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('condition')) {
+      context.handle(
+        _conditionMeta,
+        condition.isAcceptableOrUnknown(data['condition']!, _conditionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_conditionMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  RoomFacility map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RoomFacility(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      roomId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}room_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      condition: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}condition'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $RoomFacilitiesTable createAlias(String alias) {
+    return $RoomFacilitiesTable(attachedDatabase, alias);
+  }
+}
+
+class RoomFacility extends DataClass implements Insertable<RoomFacility> {
+  final String id;
+  final String roomId;
+  final String name;
+  final String condition;
+  final String? description;
+  final DateTime createdAt;
+  const RoomFacility({
+    required this.id,
+    required this.roomId,
+    required this.name,
+    required this.condition,
+    this.description,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['room_id'] = Variable<String>(roomId);
+    map['name'] = Variable<String>(name);
+    map['condition'] = Variable<String>(condition);
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String>(description);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  RoomFacilitiesCompanion toCompanion(bool nullToAbsent) {
+    return RoomFacilitiesCompanion(
+      id: Value(id),
+      roomId: Value(roomId),
+      name: Value(name),
+      condition: Value(condition),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory RoomFacility.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RoomFacility(
+      id: serializer.fromJson<String>(json['id']),
+      roomId: serializer.fromJson<String>(json['roomId']),
+      name: serializer.fromJson<String>(json['name']),
+      condition: serializer.fromJson<String>(json['condition']),
+      description: serializer.fromJson<String?>(json['description']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'roomId': serializer.toJson<String>(roomId),
+      'name': serializer.toJson<String>(name),
+      'condition': serializer.toJson<String>(condition),
+      'description': serializer.toJson<String?>(description),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  RoomFacility copyWith({
+    String? id,
+    String? roomId,
+    String? name,
+    String? condition,
+    Value<String?> description = const Value.absent(),
+    DateTime? createdAt,
+  }) => RoomFacility(
+    id: id ?? this.id,
+    roomId: roomId ?? this.roomId,
+    name: name ?? this.name,
+    condition: condition ?? this.condition,
+    description: description.present ? description.value : this.description,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  RoomFacility copyWithCompanion(RoomFacilitiesCompanion data) {
+    return RoomFacility(
+      id: data.id.present ? data.id.value : this.id,
+      roomId: data.roomId.present ? data.roomId.value : this.roomId,
+      name: data.name.present ? data.name.value : this.name,
+      condition: data.condition.present ? data.condition.value : this.condition,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RoomFacility(')
+          ..write('id: $id, ')
+          ..write('roomId: $roomId, ')
+          ..write('name: $name, ')
+          ..write('condition: $condition, ')
+          ..write('description: $description, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, roomId, name, condition, description, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RoomFacility &&
+          other.id == this.id &&
+          other.roomId == this.roomId &&
+          other.name == this.name &&
+          other.condition == this.condition &&
+          other.description == this.description &&
+          other.createdAt == this.createdAt);
+}
+
+class RoomFacilitiesCompanion extends UpdateCompanion<RoomFacility> {
+  final Value<String> id;
+  final Value<String> roomId;
+  final Value<String> name;
+  final Value<String> condition;
+  final Value<String?> description;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const RoomFacilitiesCompanion({
+    this.id = const Value.absent(),
+    this.roomId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.condition = const Value.absent(),
+    this.description = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  RoomFacilitiesCompanion.insert({
+    required String id,
+    required String roomId,
+    required String name,
+    required String condition,
+    this.description = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       roomId = Value(roomId),
+       name = Value(name),
+       condition = Value(condition);
+  static Insertable<RoomFacility> custom({
+    Expression<String>? id,
+    Expression<String>? roomId,
+    Expression<String>? name,
+    Expression<String>? condition,
+    Expression<String>? description,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (roomId != null) 'room_id': roomId,
+      if (name != null) 'name': name,
+      if (condition != null) 'condition': condition,
+      if (description != null) 'description': description,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  RoomFacilitiesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? roomId,
+    Value<String>? name,
+    Value<String>? condition,
+    Value<String?>? description,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return RoomFacilitiesCompanion(
+      id: id ?? this.id,
+      roomId: roomId ?? this.roomId,
+      name: name ?? this.name,
+      condition: condition ?? this.condition,
+      description: description ?? this.description,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (roomId.present) {
+      map['room_id'] = Variable<String>(roomId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (condition.present) {
+      map['condition'] = Variable<String>(condition.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RoomFacilitiesCompanion(')
+          ..write('id: $id, ')
+          ..write('roomId: $roomId, ')
+          ..write('name: $name, ')
+          ..write('condition: $condition, ')
+          ..write('description: $description, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -6159,6 +6572,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $MaintenanceTicketsTable maintenanceTickets =
       $MaintenanceTicketsTable(this);
   late final $AuditLogsTable auditLogs = $AuditLogsTable(this);
+  late final $RoomFacilitiesTable roomFacilities = $RoomFacilitiesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -6176,6 +6590,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     paymentItems,
     maintenanceTickets,
     auditLogs,
+    roomFacilities,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -6269,6 +6684,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('audit_logs', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'rooms',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('room_facilities', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -8957,6 +9379,24 @@ final class $$RoomsTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$RoomFacilitiesTable, List<RoomFacility>>
+  _roomFacilitiesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.roomFacilities,
+    aliasName: 'rooms__id__room_facilities__room_id',
+  );
+
+  $$RoomFacilitiesTableProcessedTableManager get roomFacilitiesRefs {
+    final manager = $$RoomFacilitiesTableTableManager(
+      $_db,
+      $_db.roomFacilities,
+    ).filter((f) => f.roomId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_roomFacilitiesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$RoomsTableFilterComposer extends Composer<_$AppDatabase, $RoomsTable> {
@@ -9081,6 +9521,31 @@ class $$RoomsTableFilterComposer extends Composer<_$AppDatabase, $RoomsTable> {
           }) => $$MaintenanceTicketsTableFilterComposer(
             $db: $db,
             $table: $db.maintenanceTickets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> roomFacilitiesRefs(
+    Expression<bool> Function($$RoomFacilitiesTableFilterComposer f) f,
+  ) {
+    final $$RoomFacilitiesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.roomFacilities,
+      getReferencedColumn: (t) => t.roomId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoomFacilitiesTableFilterComposer(
+            $db: $db,
+            $table: $db.roomFacilities,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -9294,6 +9759,31 @@ class $$RoomsTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> roomFacilitiesRefs<T extends Object>(
+    Expression<T> Function($$RoomFacilitiesTableAnnotationComposer a) f,
+  ) {
+    final $$RoomFacilitiesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.roomFacilities,
+      getReferencedColumn: (t) => t.roomId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoomFacilitiesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.roomFacilities,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$RoomsTableTableManager
@@ -9313,6 +9803,7 @@ class $$RoomsTableTableManager
             bool propertyId,
             bool contractsRefs,
             bool maintenanceTicketsRefs,
+            bool roomFacilitiesRefs,
           })
         > {
   $$RoomsTableTableManager(_$AppDatabase db, $RoomsTable table)
@@ -9393,12 +9884,14 @@ class $$RoomsTableTableManager
                 propertyId = false,
                 contractsRefs = false,
                 maintenanceTicketsRefs = false,
+                roomFacilitiesRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (contractsRefs) db.contracts,
                     if (maintenanceTicketsRefs) db.maintenanceTickets,
+                    if (roomFacilitiesRefs) db.roomFacilities,
                   ],
                   addJoins:
                       <
@@ -9472,6 +9965,27 @@ class $$RoomsTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (roomFacilitiesRefs)
+                        await $_getPrefetchedData<
+                          Room,
+                          $RoomsTable,
+                          RoomFacility
+                        >(
+                          currentTable: table,
+                          referencedTable: $$RoomsTableReferences
+                              ._roomFacilitiesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$RoomsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).roomFacilitiesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.roomId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -9496,6 +10010,7 @@ typedef $$RoomsTableProcessedTableManager =
         bool propertyId,
         bool contractsRefs,
         bool maintenanceTicketsRefs,
+        bool roomFacilitiesRefs,
       })
     >;
 typedef $$ResidentsTableCreateCompanionBuilder =
@@ -13427,6 +13942,351 @@ typedef $$AuditLogsTableProcessedTableManager =
       AuditLog,
       PrefetchHooks Function({bool organizationId, bool userId})
     >;
+typedef $$RoomFacilitiesTableCreateCompanionBuilder =
+    RoomFacilitiesCompanion Function({
+      required String id,
+      required String roomId,
+      required String name,
+      required String condition,
+      Value<String?> description,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+typedef $$RoomFacilitiesTableUpdateCompanionBuilder =
+    RoomFacilitiesCompanion Function({
+      Value<String> id,
+      Value<String> roomId,
+      Value<String> name,
+      Value<String> condition,
+      Value<String?> description,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+final class $$RoomFacilitiesTableReferences
+    extends BaseReferences<_$AppDatabase, $RoomFacilitiesTable, RoomFacility> {
+  $$RoomFacilitiesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $RoomsTable _roomIdTable(_$AppDatabase db) =>
+      db.rooms.createAlias('room_facilities__room_id__rooms__id');
+
+  $$RoomsTableProcessedTableManager get roomId {
+    final $_column = $_itemColumn<String>('room_id')!;
+
+    final manager = $$RoomsTableTableManager(
+      $_db,
+      $_db.rooms,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_roomIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$RoomFacilitiesTableFilterComposer
+    extends Composer<_$AppDatabase, $RoomFacilitiesTable> {
+  $$RoomFacilitiesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get condition => $composableBuilder(
+    column: $table.condition,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$RoomsTableFilterComposer get roomId {
+    final $$RoomsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.roomId,
+      referencedTable: $db.rooms,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoomsTableFilterComposer(
+            $db: $db,
+            $table: $db.rooms,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$RoomFacilitiesTableOrderingComposer
+    extends Composer<_$AppDatabase, $RoomFacilitiesTable> {
+  $$RoomFacilitiesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get condition => $composableBuilder(
+    column: $table.condition,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$RoomsTableOrderingComposer get roomId {
+    final $$RoomsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.roomId,
+      referencedTable: $db.rooms,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoomsTableOrderingComposer(
+            $db: $db,
+            $table: $db.rooms,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$RoomFacilitiesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $RoomFacilitiesTable> {
+  $$RoomFacilitiesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get condition =>
+      $composableBuilder(column: $table.condition, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$RoomsTableAnnotationComposer get roomId {
+    final $$RoomsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.roomId,
+      referencedTable: $db.rooms,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoomsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.rooms,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$RoomFacilitiesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $RoomFacilitiesTable,
+          RoomFacility,
+          $$RoomFacilitiesTableFilterComposer,
+          $$RoomFacilitiesTableOrderingComposer,
+          $$RoomFacilitiesTableAnnotationComposer,
+          $$RoomFacilitiesTableCreateCompanionBuilder,
+          $$RoomFacilitiesTableUpdateCompanionBuilder,
+          (RoomFacility, $$RoomFacilitiesTableReferences),
+          RoomFacility,
+          PrefetchHooks Function({bool roomId})
+        > {
+  $$RoomFacilitiesTableTableManager(
+    _$AppDatabase db,
+    $RoomFacilitiesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RoomFacilitiesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RoomFacilitiesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RoomFacilitiesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> roomId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> condition = const Value.absent(),
+                Value<String?> description = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => RoomFacilitiesCompanion(
+                id: id,
+                roomId: roomId,
+                name: name,
+                condition: condition,
+                description: description,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String roomId,
+                required String name,
+                required String condition,
+                Value<String?> description = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => RoomFacilitiesCompanion.insert(
+                id: id,
+                roomId: roomId,
+                name: name,
+                condition: condition,
+                description: description,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$RoomFacilitiesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({roomId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (roomId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.roomId,
+                                referencedTable: $$RoomFacilitiesTableReferences
+                                    ._roomIdTable(db),
+                                referencedColumn:
+                                    $$RoomFacilitiesTableReferences
+                                        ._roomIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$RoomFacilitiesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $RoomFacilitiesTable,
+      RoomFacility,
+      $$RoomFacilitiesTableFilterComposer,
+      $$RoomFacilitiesTableOrderingComposer,
+      $$RoomFacilitiesTableAnnotationComposer,
+      $$RoomFacilitiesTableCreateCompanionBuilder,
+      $$RoomFacilitiesTableUpdateCompanionBuilder,
+      (RoomFacility, $$RoomFacilitiesTableReferences),
+      RoomFacility,
+      PrefetchHooks Function({bool roomId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -13455,4 +14315,6 @@ class $AppDatabaseManager {
       $$MaintenanceTicketsTableTableManager(_db, _db.maintenanceTickets);
   $$AuditLogsTableTableManager get auditLogs =>
       $$AuditLogsTableTableManager(_db, _db.auditLogs);
+  $$RoomFacilitiesTableTableManager get roomFacilities =>
+      $$RoomFacilitiesTableTableManager(_db, _db.roomFacilities);
 }

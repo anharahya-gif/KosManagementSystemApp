@@ -13,6 +13,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:kms/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:kms/features/auth/presentation/cubit/auth_state.dart';
 import 'package:kms/features/property/presentation/pages/add_room_page.dart';
+import 'package:kms/features/property/presentation/pages/room_facilities_page.dart';
 
 class PropertyDetailPage extends StatefulWidget {
   final PropertyEntity property;
@@ -466,6 +467,21 @@ class _PropertyDetailPageState extends State<PropertyDetailPage> {
                     _showRoomImagesDialog(context, room);
                   },
                 ),
+              ListTile(
+                leading: const Icon(Icons.business_center_outlined, color: Colors.orange),
+                title: const Text('Kelola Fasilitas Kamar (CRUD)'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => RoomFacilitiesPage(room: room),
+                    ),
+                  );
+                  // Reload rooms list to update displayed facilities list
+                  _loadRooms();
+                },
+              ),
               ListTile(
                 leading: const Icon(Icons.edit, color: Colors.blue),
                 title: const Text('Edit Kamar'),
