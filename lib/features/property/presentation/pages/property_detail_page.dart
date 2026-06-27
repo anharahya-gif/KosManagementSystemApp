@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kms/core/di/injection_container.dart';
@@ -296,52 +297,123 @@ class _PropertyDetailPageState extends State<PropertyDetailPage> {
       locationText += room.floorName!;
     }
 
+    final hasImages = room.images.isNotEmpty;
+    final firstImagePath = hasImages ? room.images.first : null;
+    final imageFile = firstImagePath != null ? File(firstImagePath) : null;
+    final imageExists = imageFile != null && imageFile.existsSync();
+
+    Widget imageWidget = Container(
+      width: 80,
+      height: 80,
+      decoration: BoxDecoration(
+        color: statusColor.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Center(
+        child: Icon(Icons.meeting_room_outlined, color: statusColor, size: 24),
+      ),
+    );
+
+    if (imageExists) {
+      imageWidget = ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Image.file(
+          imageFile,
+          width: 80,
+          height: 80,
+          fit: BoxFit.cover,
+        ),
+      );
+    }
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(12),
-        leading: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-          decoration: BoxDecoration(
-            color: statusColor.withOpacity(0.12),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: statusColor.withOpacity(0.3), width: 1.5),
-          ),
-          child: Text(
-            room.roomNumber,
-            style: TextStyle(
-              color: statusColor,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
-          ),
-        ),
-        title: Text(
-          formattedPrice,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-        subtitle: locationText.isNotEmpty
-            ? Text(
-                locationText,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-              )
-            : null,
-        trailing: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: statusColor.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Text(
-            room.status.name.toUpperCase(),
-            style: TextStyle(
-              color: statusColor,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
         onTap: () => _showRoomActionSheet(context, room),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              imageWidget,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: statusColor.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            room.roomNumber,
+                            style: TextStyle(
+                              color: statusColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: statusColor.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            room.status.name.toUpperCase(),
+                            style: TextStyle(
+                              color: statusColor,
+                              fontSize: 8,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      formattedPrice,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    ),
+                    if (locationText.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        locationText,
+                        style: const TextStyle(fontSize: 10, color: Colors.grey),
+                      ),
+                    ],
+                    if (room.facilities.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: 4,
+                        runSpacing: 2,
+                        children: room.facilities.map((fac) => Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            fac,
+                            style: const TextStyle(fontSize: 8, color: Colors.grey),
+                          ),
+                        )).toList(),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -385,6 +457,15 @@ class _PropertyDetailPageState extends State<PropertyDetailPage> {
                   );
                 },
               ),
+              if (room.images.isNotEmpty)
+                ListTile(
+                  leading: const Icon(Icons.photo_library, color: Colors.teal),
+                  title: const Text('Lihat Foto Kondisi Kamar'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showRoomImagesDialog(context, room);
+                  },
+                ),
               ListTile(
                 leading: const Icon(Icons.edit, color: Colors.blue),
                 title: const Text('Edit Kamar'),
@@ -478,6 +559,73 @@ class _PropertyDetailPageState extends State<PropertyDetailPage> {
               child: const Text('Ya, Hapus'),
             ),
           ],
+        );
+      },
+    );
+  }
+
+  void _showRoomImagesDialog(BuildContext context, RoomEntity room) {
+    showDialog(
+      context: context,
+      builder: (dialogCtx) {
+        return Dialog(
+          insetPadding: const EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AppBar(
+                title: Text('Foto Kondisi ${room.roomNumber}'),
+                automaticallyImplyLeading: false,
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(dialogCtx),
+                  ),
+                ],
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                ),
+              ),
+              SizedBox(
+                height: 300,
+                child: PageView.builder(
+                  itemCount: room.images.length,
+                  itemBuilder: (context, index) {
+                    final path = room.images[index];
+                    final file = File(path);
+                    final exists = file.existsSync();
+
+                    return InteractiveViewer(
+                      child: exists
+                          ? Image.file(
+                              file,
+                              fit: BoxFit.contain,
+                            )
+                          : Container(
+                              color: Colors.grey.shade200,
+                              child: const Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.broken_image, size: 48, color: Colors.grey),
+                                  SizedBox(height: 8),
+                                  Text('File tidak ditemukan', style: TextStyle(color: Colors.grey)),
+                                ],
+                              ),
+                            ),
+                    );
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Text(
+                  'Gunakan 2 jari untuk zoom. Geser kanan/kiri untuk foto lain.',
+                  style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                ),
+              ),
+            ],
+          ),
         );
       },
     );

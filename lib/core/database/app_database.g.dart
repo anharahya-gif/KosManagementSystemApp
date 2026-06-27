@@ -1741,6 +1741,26 @@ class $RoomsTable extends Rooms with TableInfo<$RoomsTable, Room> {
     requiredDuringInsert: false,
     defaultValue: const Constant('vacant'),
   );
+  static const VerificationMeta _imagesMeta = const VerificationMeta('images');
+  @override
+  late final GeneratedColumn<String> images = GeneratedColumn<String>(
+    'images',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _facilitiesMeta = const VerificationMeta(
+    'facilities',
+  );
+  @override
+  late final GeneratedColumn<String> facilities = GeneratedColumn<String>(
+    'facilities',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _deletedAtMeta = const VerificationMeta(
     'deletedAt',
   );
@@ -1773,6 +1793,8 @@ class $RoomsTable extends Rooms with TableInfo<$RoomsTable, Room> {
     floorName,
     pricePerMonth,
     status,
+    images,
+    facilities,
     deletedAt,
     createdAt,
   ];
@@ -1841,6 +1863,18 @@ class $RoomsTable extends Rooms with TableInfo<$RoomsTable, Room> {
         status.isAcceptableOrUnknown(data['status']!, _statusMeta),
       );
     }
+    if (data.containsKey('images')) {
+      context.handle(
+        _imagesMeta,
+        images.isAcceptableOrUnknown(data['images']!, _imagesMeta),
+      );
+    }
+    if (data.containsKey('facilities')) {
+      context.handle(
+        _facilitiesMeta,
+        facilities.isAcceptableOrUnknown(data['facilities']!, _facilitiesMeta),
+      );
+    }
     if (data.containsKey('deleted_at')) {
       context.handle(
         _deletedAtMeta,
@@ -1890,6 +1924,14 @@ class $RoomsTable extends Rooms with TableInfo<$RoomsTable, Room> {
         DriftSqlType.string,
         data['${effectivePrefix}status'],
       )!,
+      images: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}images'],
+      ),
+      facilities: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}facilities'],
+      ),
       deletedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}deleted_at'],
@@ -1915,6 +1957,8 @@ class Room extends DataClass implements Insertable<Room> {
   final String? floorName;
   final int pricePerMonth;
   final String status;
+  final String? images;
+  final String? facilities;
   final DateTime? deletedAt;
   final DateTime createdAt;
   const Room({
@@ -1925,6 +1969,8 @@ class Room extends DataClass implements Insertable<Room> {
     this.floorName,
     required this.pricePerMonth,
     required this.status,
+    this.images,
+    this.facilities,
     this.deletedAt,
     required this.createdAt,
   });
@@ -1942,6 +1988,12 @@ class Room extends DataClass implements Insertable<Room> {
     }
     map['price_per_month'] = Variable<int>(pricePerMonth);
     map['status'] = Variable<String>(status);
+    if (!nullToAbsent || images != null) {
+      map['images'] = Variable<String>(images);
+    }
+    if (!nullToAbsent || facilities != null) {
+      map['facilities'] = Variable<String>(facilities);
+    }
     if (!nullToAbsent || deletedAt != null) {
       map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
@@ -1962,6 +2014,12 @@ class Room extends DataClass implements Insertable<Room> {
           : Value(floorName),
       pricePerMonth: Value(pricePerMonth),
       status: Value(status),
+      images: images == null && nullToAbsent
+          ? const Value.absent()
+          : Value(images),
+      facilities: facilities == null && nullToAbsent
+          ? const Value.absent()
+          : Value(facilities),
       deletedAt: deletedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(deletedAt),
@@ -1982,6 +2040,8 @@ class Room extends DataClass implements Insertable<Room> {
       floorName: serializer.fromJson<String?>(json['floorName']),
       pricePerMonth: serializer.fromJson<int>(json['pricePerMonth']),
       status: serializer.fromJson<String>(json['status']),
+      images: serializer.fromJson<String?>(json['images']),
+      facilities: serializer.fromJson<String?>(json['facilities']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
@@ -1997,6 +2057,8 @@ class Room extends DataClass implements Insertable<Room> {
       'floorName': serializer.toJson<String?>(floorName),
       'pricePerMonth': serializer.toJson<int>(pricePerMonth),
       'status': serializer.toJson<String>(status),
+      'images': serializer.toJson<String?>(images),
+      'facilities': serializer.toJson<String?>(facilities),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
@@ -2010,6 +2072,8 @@ class Room extends DataClass implements Insertable<Room> {
     Value<String?> floorName = const Value.absent(),
     int? pricePerMonth,
     String? status,
+    Value<String?> images = const Value.absent(),
+    Value<String?> facilities = const Value.absent(),
     Value<DateTime?> deletedAt = const Value.absent(),
     DateTime? createdAt,
   }) => Room(
@@ -2020,6 +2084,8 @@ class Room extends DataClass implements Insertable<Room> {
     floorName: floorName.present ? floorName.value : this.floorName,
     pricePerMonth: pricePerMonth ?? this.pricePerMonth,
     status: status ?? this.status,
+    images: images.present ? images.value : this.images,
+    facilities: facilities.present ? facilities.value : this.facilities,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
     createdAt: createdAt ?? this.createdAt,
   );
@@ -2040,6 +2106,10 @@ class Room extends DataClass implements Insertable<Room> {
           ? data.pricePerMonth.value
           : this.pricePerMonth,
       status: data.status.present ? data.status.value : this.status,
+      images: data.images.present ? data.images.value : this.images,
+      facilities: data.facilities.present
+          ? data.facilities.value
+          : this.facilities,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
@@ -2055,6 +2125,8 @@ class Room extends DataClass implements Insertable<Room> {
           ..write('floorName: $floorName, ')
           ..write('pricePerMonth: $pricePerMonth, ')
           ..write('status: $status, ')
+          ..write('images: $images, ')
+          ..write('facilities: $facilities, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
@@ -2070,6 +2142,8 @@ class Room extends DataClass implements Insertable<Room> {
     floorName,
     pricePerMonth,
     status,
+    images,
+    facilities,
     deletedAt,
     createdAt,
   );
@@ -2084,6 +2158,8 @@ class Room extends DataClass implements Insertable<Room> {
           other.floorName == this.floorName &&
           other.pricePerMonth == this.pricePerMonth &&
           other.status == this.status &&
+          other.images == this.images &&
+          other.facilities == this.facilities &&
           other.deletedAt == this.deletedAt &&
           other.createdAt == this.createdAt);
 }
@@ -2096,6 +2172,8 @@ class RoomsCompanion extends UpdateCompanion<Room> {
   final Value<String?> floorName;
   final Value<int> pricePerMonth;
   final Value<String> status;
+  final Value<String?> images;
+  final Value<String?> facilities;
   final Value<DateTime?> deletedAt;
   final Value<DateTime> createdAt;
   final Value<int> rowid;
@@ -2107,6 +2185,8 @@ class RoomsCompanion extends UpdateCompanion<Room> {
     this.floorName = const Value.absent(),
     this.pricePerMonth = const Value.absent(),
     this.status = const Value.absent(),
+    this.images = const Value.absent(),
+    this.facilities = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -2119,6 +2199,8 @@ class RoomsCompanion extends UpdateCompanion<Room> {
     this.floorName = const Value.absent(),
     required int pricePerMonth,
     this.status = const Value.absent(),
+    this.images = const Value.absent(),
+    this.facilities = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -2134,6 +2216,8 @@ class RoomsCompanion extends UpdateCompanion<Room> {
     Expression<String>? floorName,
     Expression<int>? pricePerMonth,
     Expression<String>? status,
+    Expression<String>? images,
+    Expression<String>? facilities,
     Expression<DateTime>? deletedAt,
     Expression<DateTime>? createdAt,
     Expression<int>? rowid,
@@ -2146,6 +2230,8 @@ class RoomsCompanion extends UpdateCompanion<Room> {
       if (floorName != null) 'floor_name': floorName,
       if (pricePerMonth != null) 'price_per_month': pricePerMonth,
       if (status != null) 'status': status,
+      if (images != null) 'images': images,
+      if (facilities != null) 'facilities': facilities,
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (createdAt != null) 'created_at': createdAt,
       if (rowid != null) 'rowid': rowid,
@@ -2160,6 +2246,8 @@ class RoomsCompanion extends UpdateCompanion<Room> {
     Value<String?>? floorName,
     Value<int>? pricePerMonth,
     Value<String>? status,
+    Value<String?>? images,
+    Value<String?>? facilities,
     Value<DateTime?>? deletedAt,
     Value<DateTime>? createdAt,
     Value<int>? rowid,
@@ -2172,6 +2260,8 @@ class RoomsCompanion extends UpdateCompanion<Room> {
       floorName: floorName ?? this.floorName,
       pricePerMonth: pricePerMonth ?? this.pricePerMonth,
       status: status ?? this.status,
+      images: images ?? this.images,
+      facilities: facilities ?? this.facilities,
       deletedAt: deletedAt ?? this.deletedAt,
       createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
@@ -2202,6 +2292,12 @@ class RoomsCompanion extends UpdateCompanion<Room> {
     if (status.present) {
       map['status'] = Variable<String>(status.value);
     }
+    if (images.present) {
+      map['images'] = Variable<String>(images.value);
+    }
+    if (facilities.present) {
+      map['facilities'] = Variable<String>(facilities.value);
+    }
     if (deletedAt.present) {
       map['deleted_at'] = Variable<DateTime>(deletedAt.value);
     }
@@ -2224,6 +2320,8 @@ class RoomsCompanion extends UpdateCompanion<Room> {
           ..write('floorName: $floorName, ')
           ..write('pricePerMonth: $pricePerMonth, ')
           ..write('status: $status, ')
+          ..write('images: $images, ')
+          ..write('facilities: $facilities, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('createdAt: $createdAt, ')
           ..write('rowid: $rowid')
@@ -8778,6 +8876,8 @@ typedef $$RoomsTableCreateCompanionBuilder =
       Value<String?> floorName,
       required int pricePerMonth,
       Value<String> status,
+      Value<String?> images,
+      Value<String?> facilities,
       Value<DateTime?> deletedAt,
       Value<DateTime> createdAt,
       Value<int> rowid,
@@ -8791,6 +8891,8 @@ typedef $$RoomsTableUpdateCompanionBuilder =
       Value<String?> floorName,
       Value<int> pricePerMonth,
       Value<String> status,
+      Value<String?> images,
+      Value<String?> facilities,
       Value<DateTime?> deletedAt,
       Value<DateTime> createdAt,
       Value<int> rowid,
@@ -8892,6 +8994,16 @@ class $$RoomsTableFilterComposer extends Composer<_$AppDatabase, $RoomsTable> {
 
   ColumnFilters<String> get status => $composableBuilder(
     column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get images => $composableBuilder(
+    column: $table.images,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get facilities => $composableBuilder(
+    column: $table.facilities,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -9018,6 +9130,16 @@ class $$RoomsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get images => $composableBuilder(
+    column: $table.images,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get facilities => $composableBuilder(
+    column: $table.facilities,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
     column: $table.deletedAt,
     builder: (column) => ColumnOrderings(column),
@@ -9084,6 +9206,14 @@ class $$RoomsTableAnnotationComposer
 
   GeneratedColumn<String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get images =>
+      $composableBuilder(column: $table.images, builder: (column) => column);
+
+  GeneratedColumn<String> get facilities => $composableBuilder(
+    column: $table.facilities,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get deletedAt =>
       $composableBuilder(column: $table.deletedAt, builder: (column) => column);
@@ -9205,6 +9335,8 @@ class $$RoomsTableTableManager
                 Value<String?> floorName = const Value.absent(),
                 Value<int> pricePerMonth = const Value.absent(),
                 Value<String> status = const Value.absent(),
+                Value<String?> images = const Value.absent(),
+                Value<String?> facilities = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -9216,6 +9348,8 @@ class $$RoomsTableTableManager
                 floorName: floorName,
                 pricePerMonth: pricePerMonth,
                 status: status,
+                images: images,
+                facilities: facilities,
                 deletedAt: deletedAt,
                 createdAt: createdAt,
                 rowid: rowid,
@@ -9229,6 +9363,8 @@ class $$RoomsTableTableManager
                 Value<String?> floorName = const Value.absent(),
                 required int pricePerMonth,
                 Value<String> status = const Value.absent(),
+                Value<String?> images = const Value.absent(),
+                Value<String?> facilities = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -9240,6 +9376,8 @@ class $$RoomsTableTableManager
                 floorName: floorName,
                 pricePerMonth: pricePerMonth,
                 status: status,
+                images: images,
+                facilities: facilities,
                 deletedAt: deletedAt,
                 createdAt: createdAt,
                 rowid: rowid,

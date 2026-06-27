@@ -35,6 +35,8 @@ class PropertyRepositoryImpl implements PropertyRepository {
       floorName: row.floorName,
       pricePerMonth: CurrencyFormatter.toRupiahDouble(row.pricePerMonth),
       status: RoomStatus.fromString(row.status),
+      images: row.images != null && row.images!.isNotEmpty ? row.images!.split(',') : const [],
+      facilities: row.facilities != null && row.facilities!.isNotEmpty ? row.facilities!.split(',') : const [],
       deletedAt: row.deletedAt,
       createdAt: row.createdAt,
     );
@@ -138,6 +140,8 @@ class PropertyRepositoryImpl implements PropertyRepository {
               floorName: Value(room.floorName),
               pricePerMonth: CurrencyFormatter.toCents(room.pricePerMonth),
               status: Value(room.status.name),
+              images: Value(room.images.join(',')),
+              facilities: Value(room.facilities.join(',')),
               createdAt: Value(room.createdAt),
             ),
           );
@@ -159,6 +163,8 @@ class PropertyRepositoryImpl implements PropertyRepository {
               floorName: Value(room.floorName),
               pricePerMonth: Value(CurrencyFormatter.toCents(room.pricePerMonth)),
               status: Value(room.status.name),
+              images: Value(room.images.join(',')),
+              facilities: Value(room.facilities.join(',')),
             ),
           );
       return const Success(null);

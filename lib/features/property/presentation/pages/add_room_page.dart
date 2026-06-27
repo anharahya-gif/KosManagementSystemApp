@@ -1,6 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:kms/core/di/injection_container.dart';
+import 'package:kms/core/theme/app_theme.dart';
 import 'package:kms/features/property/domain/entities/room_entity.dart';
 import 'package:kms/features/property/presentation/cubit/property_cubit.dart';
 import 'package:kms/features/property/presentation/cubit/property_state.dart';
@@ -26,6 +29,22 @@ class _AddRoomPageState extends State<AddRoomPage> {
   late PropertyCubit _propertyCubit;
   bool get _isEditMode => widget.roomToEdit != null;
 
+  List<String> _selectedImagePaths = [];
+  List<String> _selectedFacilities = [];
+
+  final List<String> _availableFacilities = [
+    'AC',
+    'Kamar Mandi Dalam',
+    'Kasur (Bed)',
+    'Wifi',
+    'Lemari',
+    'Meja & Kursi',
+    'TV',
+    'Air Panas (Water Heater)',
+    'Balkon',
+    'Kulkas Kecil'
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -37,6 +56,20 @@ class _AddRoomPageState extends State<AddRoomPage> {
       _priceController.text = room.pricePerMonth.toStringAsFixed(0);
       _buildingController.text = room.buildingName ?? '';
       _floorController.text = room.floorName ?? '';
+      _selectedImagePaths = List.from(room.images);
+      _selectedFacilities = List.from(room.facilities);
+    }
+  }
+
+  Future<void> _pickImages() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      allowMultiple: true,
+    );
+    if (result != null) {
+      setState(() {
+        _selectedImagePaths.addAll(result.paths.whereType<String>());
+      });
     }
   }
 
@@ -131,6 +164,114 @@ class _AddRoomPageState extends State<AddRoomPage> {
                       hintText: 'Contoh: Lantai 2, Lantai Mezanin',
                     ),
                   ),
+                  const Divider(height: 32),
+                  const Text(
+                    'Fasilitas Kamar',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: _availableFacilities.map((facility) {
+                      final isSelected = _selectedFacilities.contains(facility);
+                      return FilterChip(
+                        label: Text(facility),
+                        selected: isSelected,
+                        selectedColor: AppTheme.primaryColor.withValues(alpha: 0.2),
+                        checkmarkColor: AppTheme.primaryColor,
+                        onSelected: (selected) {
+                          setState(() {
+                            if (selected) {
+                              _selectedFacilities.add(facility);
+                            } else {
+                              _selectedFacilities.remove(facility);
+                            }
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  const Divider(height: 32),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Foto Kondisi Kamar',
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                      ),
+                      TextButton.icon(
+                        icon: const Icon(Icons.add_a_photo_outlined, size: 18),
+                        label: const Text('Tambah Foto', style: TextStyle(fontSize: 12)),
+                        onPressed: _pickImages,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  _selectedImagePaths.isEmpty
+                      ? Container(
+                          height: 100,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.withValues(alpha: 0.05),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey.shade300),
+                          ),
+                          child: const Center(
+                            child: Text(
+                              'Belum ada foto kamar ditambahkan',
+                              style: TextStyle(color: Colors.grey, fontSize: 12),
+                            ),
+                          ),
+                        )
+                      : SizedBox(
+                          height: 120,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: _selectedImagePaths.length,
+                            itemBuilder: (context, idx) {
+                              final path = _selectedImagePaths[idx];
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 12),
+                                child: Stack(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: path.startsWith('http') || !File(path).existsSync()
+                                          ? Container(
+                                              width: 120,
+                                              height: 120,
+                                              color: Colors.grey.shade300,
+                                              child: const Icon(Icons.broken_image, color: Colors.grey),
+                                            )
+                                          : Image.file(
+                                              File(path),
+                                              width: 120,
+                                              height: 120,
+                                              fit: BoxFit.cover,
+                                            ),
+                                    ),
+                                    Positioned(
+                                      top: 4,
+                                      right: 4,
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            _selectedImagePaths.removeAt(idx);
+                                          });
+                                        },
+                                        child: CircleAvatar(
+                                          radius: 12,
+                                          backgroundColor: Colors.black.withValues(alpha: 0.6),
+                                          child: const Icon(Icons.close, size: 14, color: Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
                   const SizedBox(height: 32),
                   ElevatedButton(
                     onPressed: state is PropertyLoading ? null : _submit,
@@ -165,6 +306,8 @@ class _AddRoomPageState extends State<AddRoomPage> {
             : _floorController.text.trim(),
         pricePerMonth: double.parse(_priceController.text.trim()),
         status: _isEditMode ? widget.roomToEdit!.status : RoomStatus.vacant,
+        images: _selectedImagePaths,
+        facilities: _selectedFacilities,
         createdAt: _isEditMode ? widget.roomToEdit!.createdAt : DateTime.now(),
       );
 

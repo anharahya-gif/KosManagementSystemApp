@@ -164,8 +164,8 @@ class BackupService {
       final m = row as Map<String, dynamic>;
       await _db.into(_db.organizations).insert(
             OrganizationsCompanion.insert(
-              id: m['id'] as String,
-              name: m['name'] as String,
+              id: m['id'] as String? ?? '',
+              name: m['name'] as String? ?? '',
               createdAt: Value(_parseDateTime(m['created_at']) ?? DateTime.now()),
               updatedAt: Value(_parseDateTime(m['updated_at']) ?? DateTime.now()),
             ),
@@ -179,12 +179,12 @@ class BackupService {
       final m = row as Map<String, dynamic>;
       await _db.into(_db.userProfiles).insert(
             UserProfilesCompanion.insert(
-              id: m['id'] as String,
-              organizationId: m['organization_id'] as String,
-              fullName: m['full_name'] as String,
+              id: m['id'] as String? ?? '',
+              organizationId: m['organization_id'] as String? ?? '',
+              fullName: m['full_name'] as String? ?? '',
               phoneNumber: m['phone_number'] as String? ?? '',
-              email: m['email'] as String,
-              role: m['role'] as String,
+              email: m['email'] as String? ?? '',
+              role: m['role'] as String? ?? '',
               createdAt: Value(_parseDateTime(m['created_at']) ?? DateTime.now()),
             ),
           );
@@ -197,11 +197,11 @@ class BackupService {
       final m = row as Map<String, dynamic>;
       await _db.into(_db.properties).insert(
             PropertiesCompanion.insert(
-              id: m['id'] as String,
-              organizationId: m['organization_id'] as String,
-              name: m['name'] as String,
-              address: m['address'] as String,
-              type: m['type'] as String,
+              id: m['id'] as String? ?? '',
+              organizationId: m['organization_id'] as String? ?? '',
+              name: m['name'] as String? ?? '',
+              address: m['address'] as String? ?? '',
+              type: m['type'] as String? ?? '',
               latitude: Value(m['latitude'] as double?),
               longitude: Value(m['longitude'] as double?),
               deletedAt: Value(_parseDateTime(m['deleted_at'])),
@@ -217,9 +217,9 @@ class BackupService {
       final m = row as Map<String, dynamic>;
       await _db.into(_db.propertyManagers).insert(
             PropertyManagersCompanion.insert(
-              id: m['id'] as String,
-              userId: m['user_id'] as String,
-              propertyId: m['property_id'] as String,
+              id: m['id'] as String? ?? '',
+              userId: m['user_id'] as String? ?? '',
+              propertyId: m['property_id'] as String? ?? '',
               assignedAt: Value(_parseDateTime(m['assigned_at']) ?? DateTime.now()),
             ),
           );
@@ -232,13 +232,15 @@ class BackupService {
       final m = row as Map<String, dynamic>;
       await _db.into(_db.rooms).insert(
             RoomsCompanion.insert(
-              id: m['id'] as String,
-              propertyId: m['property_id'] as String,
-              roomNumber: m['room_number'] as String,
+              id: m['id'] as String? ?? '',
+              propertyId: m['property_id'] as String? ?? '',
+              roomNumber: m['room_number'] as String? ?? '',
               buildingName: Value(m['building_name'] as String?),
               floorName: Value(m['floor_name'] as String?),
-              pricePerMonth: m['price_per_month'] as int,
+              pricePerMonth: m['price_per_month'] as int? ?? 0,
               status: Value(m['status'] as String? ?? 'vacant'),
+              images: Value(m['images'] as String?),
+              facilities: Value(m['facilities'] as String?),
               deletedAt: Value(_parseDateTime(m['deleted_at'])),
               createdAt: Value(_parseDateTime(m['created_at']) ?? DateTime.now()),
             ),
@@ -252,11 +254,11 @@ class BackupService {
       final m = row as Map<String, dynamic>;
       await _db.into(_db.residents).insert(
             ResidentsCompanion.insert(
-              id: m['id'] as String,
-              organizationId: m['organization_id'] as String,
+              id: m['id'] as String? ?? '',
+              organizationId: m['organization_id'] as String? ?? '',
               userId: Value(m['user_id'] as String?),
-              fullName: m['full_name'] as String,
-              phoneNumber: m['phone_number'] as String,
+              fullName: m['full_name'] as String? ?? '',
+              phoneNumber: m['phone_number'] as String? ?? '',
               email: Value(m['email'] as String?),
               idCardNumber: Value(m['id_card_number'] as String?),
               status: Value(m['status'] as String? ?? 'prospective'),
@@ -273,14 +275,14 @@ class BackupService {
       final m = row as Map<String, dynamic>;
       await _db.into(_db.contracts).insert(
             ContractsCompanion.insert(
-              id: m['id'] as String,
-              organizationId: m['organization_id'] as String,
-              residentId: m['resident_id'] as String,
-              roomId: m['room_id'] as String,
-              startDate: _parseDateTime(m['start_date'])!,
-              endDate: _parseDateTime(m['end_date'])!,
+              id: m['id'] as String? ?? '',
+              organizationId: m['organization_id'] as String? ?? '',
+              residentId: m['resident_id'] as String? ?? '',
+              roomId: m['room_id'] as String? ?? '',
+              startDate: _parseDateTime(m['start_date']) ?? DateTime.now(),
+              endDate: _parseDateTime(m['end_date']) ?? DateTime.now(),
               billingCycle: Value(m['billing_cycle'] as String? ?? 'monthly'),
-              pricePerCycle: m['price_per_cycle'] as int,
+              pricePerCycle: m['price_per_cycle'] as int? ?? 0,
               depositAmount: Value(m['deposit_amount'] as int? ?? 0),
               status: Value(m['status'] as String? ?? 'active'),
               createdAt: Value(_parseDateTime(m['created_at']) ?? DateTime.now()),
@@ -295,12 +297,12 @@ class BackupService {
       final m = row as Map<String, dynamic>;
       await _db.into(_db.invoices).insert(
             InvoicesCompanion.insert(
-              id: m['id'] as String,
-              organizationId: m['organization_id'] as String,
-              contractId: m['contract_id'] as String,
-              invoiceNumber: m['invoice_number'] as String,
-              dueDate: _parseDateTime(m['due_date'])!,
-              amountDue: m['amount_due'] as int,
+              id: m['id'] as String? ?? '',
+              organizationId: m['organization_id'] as String? ?? '',
+              contractId: m['contract_id'] as String? ?? '',
+              invoiceNumber: m['invoice_number'] as String? ?? '',
+              dueDate: _parseDateTime(m['due_date']) ?? DateTime.now(),
+              amountDue: m['amount_due'] as int? ?? 0,
               amountPaid: Value(m['amount_paid'] as int? ?? 0),
               status: Value(m['status'] as String? ?? 'unpaid'),
               createdAt: Value(_parseDateTime(m['created_at']) ?? DateTime.now()),
@@ -315,11 +317,11 @@ class BackupService {
       final m = row as Map<String, dynamic>;
       await _db.into(_db.payments).insert(
             PaymentsCompanion.insert(
-              id: m['id'] as String,
-              organizationId: m['organization_id'] as String,
+              id: m['id'] as String? ?? '',
+              organizationId: m['organization_id'] as String? ?? '',
               paymentDate: Value(_parseDateTime(m['payment_date']) ?? DateTime.now()),
-              amount: m['amount'] as int,
-              paymentMethod: m['payment_method'] as String,
+              amount: m['amount'] as int? ?? 0,
+              paymentMethod: m['payment_method'] as String? ?? 'transfer',
               proofUrl: Value(m['proof_url'] as String?),
               verified: Value(m['verified'] as bool? ?? false),
               createdAt: Value(_parseDateTime(m['created_at']) ?? DateTime.now()),
@@ -334,10 +336,10 @@ class BackupService {
       final m = row as Map<String, dynamic>;
       await _db.into(_db.paymentItems).insert(
             PaymentItemsCompanion.insert(
-              id: m['id'] as String,
-              paymentId: m['payment_id'] as String,
-              invoiceId: m['invoice_id'] as String,
-              amountAllocated: m['amount_allocated'] as int,
+              id: m['id'] as String? ?? '',
+              paymentId: m['payment_id'] as String? ?? '',
+              invoiceId: m['invoice_id'] as String? ?? '',
+              amountAllocated: m['amount_allocated'] as int? ?? 0,
             ),
           );
     }
@@ -349,12 +351,12 @@ class BackupService {
       final m = row as Map<String, dynamic>;
       await _db.into(_db.maintenanceTickets).insert(
             MaintenanceTicketsCompanion.insert(
-              id: m['id'] as String,
-              organizationId: m['organization_id'] as String,
-              residentId: m['resident_id'] as String,
-              roomId: m['room_id'] as String,
-              title: m['title'] as String,
-              description: m['description'] as String,
+              id: m['id'] as String? ?? '',
+              organizationId: m['organization_id'] as String? ?? '',
+              residentId: m['resident_id'] as String? ?? '',
+              roomId: m['room_id'] as String? ?? '',
+              title: m['title'] as String? ?? '',
+              description: m['description'] as String? ?? '',
               urgency: Value(m['urgency'] as String? ?? 'medium'),
               status: Value(m['status'] as String? ?? 'pending'),
               cost: Value(m['cost'] as int?),
@@ -370,11 +372,11 @@ class BackupService {
       final m = row as Map<String, dynamic>;
       await _db.into(_db.auditLogs).insert(
             AuditLogsCompanion.insert(
-              id: m['id'] as String,
-              organizationId: m['organization_id'] as String,
-              userId: m['user_id'] as String,
-              action: m['action'] as String,
-              description: m['description'] as String,
+              id: m['id'] as String? ?? '',
+              organizationId: m['organization_id'] as String? ?? '',
+              userId: m['user_id'] as String? ?? '',
+              action: m['action'] as String? ?? '',
+              description: m['description'] as String? ?? '',
               ipAddress: Value(m['ip_address'] as String?),
               createdAt: Value(_parseDateTime(m['created_at']) ?? DateTime.now()),
             ),

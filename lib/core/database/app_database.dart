@@ -67,6 +67,8 @@ class Rooms extends Table {
   TextColumn get floorName => text().nullable()();
   IntColumn get pricePerMonth => integer()(); // in Cents
   TextColumn get status => text().withDefault(const Constant('vacant'))(); // 'vacant', 'occupied', 'reserved', 'maintenance', 'inactive'
+  TextColumn get images => text().nullable()(); // comma-separated file paths or json list
+  TextColumn get facilities => text().nullable()(); // comma-separated facilities
   DateTimeColumn get deletedAt => dateTime().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
