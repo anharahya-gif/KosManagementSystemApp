@@ -225,7 +225,7 @@ class ContractRepositoryImpl implements ContractRepository {
 
         // 5. Tambah catatan audit log perpindahan
         final logId = _uuid.v4();
-        await _db.into(_db.audit_logs).insert(
+        await _db.into(_db.auditLogs).insert(
               AuditLogsCompanion.insert(
                 id: logId,
                 organizationId: contract.organizationId,
@@ -323,7 +323,7 @@ class ContractRepositoryImpl implements ContractRepository {
 
         // 2. Simpan alokasi dana
         for (var item in allocations) {
-          await _db.into(_db.payment_items).insert(
+          await _db.into(_db.paymentItems).insert(
                 PaymentItemsCompanion.insert(
                   id: item.id,
                   paymentId: item.paymentId,
@@ -387,7 +387,7 @@ class ContractRepositoryImpl implements ContractRepository {
         await query.write(const PaymentsCompanion(verified: Value(true)));
 
         // 2. Ambil seluruh item alokasi pembayaran ini
-        final allocations = await (_db.select(_db.payment_items)
+        final allocations = await (_db.select(_db.paymentItems)
               ..where((t) => t.paymentId.equals(paymentId)))
             .get();
 

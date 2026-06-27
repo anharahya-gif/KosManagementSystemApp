@@ -26,7 +26,7 @@ class DbSeeder {
     final mgr1Id = uuid.v4();
     final mgr2Id = uuid.v4();
 
-    await db.into(db.user_profiles).insert(
+    await db.into(db.userProfiles).insert(
           UserProfilesCompanion.insert(
             id: ownerId,
             organizationId: orgId,
@@ -37,7 +37,7 @@ class DbSeeder {
           ),
         );
 
-    await db.into(db.user_profiles).insert(
+    await db.into(db.userProfiles).insert(
           UserProfilesCompanion.insert(
             id: mgr1Id,
             organizationId: orgId,
@@ -48,7 +48,7 @@ class DbSeeder {
           ),
         );
 
-    await db.into(db.user_profiles).insert(
+    await db.into(db.userProfiles).insert(
           UserProfilesCompanion.insert(
             id: mgr2Id,
             organizationId: orgId,
@@ -84,7 +84,7 @@ class DbSeeder {
         );
 
     // D. Seed Penugasan Manager (Property Managers)
-    await db.into(db.property_managers).insert(
+    await db.into(db.propertyManagers).insert(
           PropertyManagersCompanion.insert(
             id: uuid.v4(),
             userId: mgr1Id,
@@ -92,7 +92,7 @@ class DbSeeder {
           ),
         );
 
-    await db.into(db.property_managers).insert(
+    await db.into(db.propertyManagers).insert(
           PropertyManagersCompanion.insert(
             id: uuid.v4(),
             userId: mgr2Id,

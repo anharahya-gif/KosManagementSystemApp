@@ -13,7 +13,7 @@ class AuthCubit extends Cubit<AuthState> {
     emit(AuthLoading());
     try {
       // Ambil user dengan role owner pertama
-      final ownerQuery = _db.select(_db.user_profiles)
+      final ownerQuery = _db.select(_db.userProfiles)
         ..where((t) => t.role.equals('owner'))
         ..limit(1);
       final owners = await ownerQuery.get();
@@ -33,7 +33,7 @@ class AuthCubit extends Cubit<AuthState> {
     emit(AuthLoading());
     try {
       // 1. Ambil data profil user
-      final userQuery = _db.select(_db.user_profiles)..where((t) => t.id.equals(userId));
+      final userQuery = _db.select(_db.userProfiles)..where((t) => t.id.equals(userId));
       final userRow = await userQuery.getSingle();
       
       final userEntity = UserProfileEntity(
@@ -48,7 +48,7 @@ class AuthCubit extends Cubit<AuthState> {
       // 2. Jika role adalah manager, ambil daftar properti yang ditugaskan
       List<String> assignedPropertyIds = [];
       if (userEntity.isManager) {
-        final pmQuery = _db.select(_db.property_managers)
+        final pmQuery = _db.select(_db.propertyManagers)
           ..where((t) => t.userId.equals(userId));
         final pmRows = await pmQuery.get();
         assignedPropertyIds = pmRows.map((r) => r.propertyId).toList();
@@ -66,7 +66,7 @@ class AuthCubit extends Cubit<AuthState> {
   /// Mengambil semua profil user di database untuk dropdown switcher
   Future<List<UserProfile>> getAllAvailableProfiles() async {
     try {
-      return await _db.select(_db.user_profiles).get();
+      return await _db.select(_db.userProfiles).get();
     } catch (_) {
       return [];
     }
