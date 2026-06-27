@@ -103,11 +103,6 @@ class BackupService {
       final jsonString = await file.readAsString();
       final data = jsonDecode(jsonString) as Map<String, dynamic>;
 
-      // Validasi metadata
-      if (!data.containsKey('_meta')) {
-        return ImportResult(success: false, message: 'Format file backup tidak valid (metadata tidak ditemukan).');
-      }
-
       int totalRows = 0;
 
       await _db.transaction(() async {
@@ -157,8 +152,27 @@ class BackupService {
 
   DateTime? _parseDateTime(dynamic value) {
     if (value == null) return null;
-    if (value is int) return DateTime.fromMillisecondsSinceEpoch(value * 1000);
-    if (value is String) return DateTime.tryParse(value);
+    if (value is num) {
+      final valInt = value.toInt();
+      if (valInt > 9999999999) {
+        return DateTime.fromMillisecondsSinceEpoch(valInt);
+      } else {
+        return DateTime.fromMillisecondsSinceEpoch(valInt * 1000);
+      }
+    }
+    if (value is String) {
+      final parsed = DateTime.tryParse(value);
+      if (parsed != null) return parsed;
+      final numVal = num.tryParse(value);
+      if (numVal != null) {
+        final valInt = numVal.toInt();
+        if (valInt > 9999999999) {
+          return DateTime.fromMillisecondsSinceEpoch(valInt);
+        } else {
+          return DateTime.fromMillisecondsSinceEpoch(valInt * 1000);
+        }
+      }
+    }
     return null;
   }
 
@@ -205,8 +219,8 @@ class BackupService {
               name: m['name'] as String? ?? '',
               address: m['address'] as String? ?? '',
               type: m['type'] as String? ?? '',
-              latitude: Value(m['latitude'] as double?),
-              longitude: Value(m['longitude'] as double?),
+              latitude: Value(m['latitude'] is num ? (m['latitude'] as num).toDouble() : null),
+              longitude: Value(m['longitude'] is num ? (m['longitude'] as num).toDouble() : null),
               deletedAt: Value(_parseDateTime(m['deleted_at'])),
               createdAt: Value(_parseDateTime(m['created_at']) ?? DateTime.now()),
             ),
@@ -240,7 +254,7 @@ class BackupService {
               roomNumber: m['room_number'] as String? ?? '',
               buildingName: Value(m['building_name'] as String?),
               floorName: Value(m['floor_name'] as String?),
-              pricePerMonth: m['price_per_month'] as int? ?? 0,
+              pricePerMonth: m['price_per_month'] is num ? (m['price_per_month'] as num).toInt() : 0,
               status: Value(m['status'] as String? ?? 'vacant'),
               images: Value(m['images'] as String?),
               facilities: Value(m['facilities'] as String?),
@@ -285,8 +299,8 @@ class BackupService {
               startDate: _parseDateTime(m['start_date']) ?? DateTime.now(),
               endDate: _parseDateTime(m['end_date']) ?? DateTime.now(),
               billingCycle: Value(m['billing_cycle'] as String? ?? 'monthly'),
-              pricePerCycle: m['price_per_cycle'] as int? ?? 0,
-              depositAmount: Value(m['deposit_amount'] as int? ?? 0),
+              pricePerCycle: m['price_per_cycle'] is num ? (m['price_per_cycle'] as num).toInt() : 0,
+              depositAmount: Value(m['deposit_amount'] is num ? (m['deposit_amount'] as num).toInt() : 0),
               status: Value(m['status'] as String? ?? 'active'),
               createdAt: Value(_parseDateTime(m['created_at']) ?? DateTime.now()),
             ),
@@ -305,8 +319,8 @@ class BackupService {
               contractId: m['contract_id'] as String? ?? '',
               invoiceNumber: m['invoice_number'] as String? ?? '',
               dueDate: _parseDateTime(m['due_date']) ?? DateTime.now(),
-              amountDue: m['amount_due'] as int? ?? 0,
-              amountPaid: Value(m['amount_paid'] as int? ?? 0),
+              amountDue: m['amount_due'] is num ? (m['amount_due'] as num).toInt() : 0,
+              amountPaid: Value(m['amount_paid'] is num ? (m['amount_paid'] as num).toInt() : 0),
               status: Value(m['status'] as String? ?? 'unpaid'),
               createdAt: Value(_parseDateTime(m['created_at']) ?? DateTime.now()),
             ),
@@ -323,10 +337,10 @@ class BackupService {
               id: m['id'] as String? ?? '',
               organizationId: m['organization_id'] as String? ?? '',
               paymentDate: Value(_parseDateTime(m['payment_date']) ?? DateTime.now()),
-              amount: m['amount'] as int? ?? 0,
+              amount: m['amount'] is num ? (m['amount'] as num).toInt() : 0,
               paymentMethod: m['payment_method'] as String? ?? 'transfer',
               proofUrl: Value(m['proof_url'] as String?),
-              verified: Value(m['verified'] as bool? ?? false),
+              verified: Value(m['verified'] is bool ? m['verified'] as bool : (m['verified'] == 1 || m['verified'] == 'true')),
               createdAt: Value(_parseDateTime(m['created_at']) ?? DateTime.now()),
             ),
           );
@@ -342,7 +356,7 @@ class BackupService {
               id: m['id'] as String? ?? '',
               paymentId: m['payment_id'] as String? ?? '',
               invoiceId: m['invoice_id'] as String? ?? '',
-              amountAllocated: m['amount_allocated'] as int? ?? 0,
+              amountAllocated: m['amount_allocated'] is num ? (m['amount_allocated'] as num).toInt() : 0,
             ),
           );
     }
@@ -362,7 +376,7 @@ class BackupService {
               description: m['description'] as String? ?? '',
               urgency: Value(m['urgency'] as String? ?? 'medium'),
               status: Value(m['status'] as String? ?? 'pending'),
-              cost: Value(m['cost'] as int?),
+              cost: Value(m['cost'] is num ? (m['cost'] as num).toInt() : null),
               createdAt: Value(_parseDateTime(m['created_at']) ?? DateTime.now()),
             ),
           );
