@@ -38,6 +38,8 @@ class Properties extends Table {
   TextColumn get name => text()();
   TextColumn get address => text()();
   TextColumn get type => text()(); // 'kos', 'kontrakan', 'apartment', 'guesthouse'
+  RealColumn get latitude => real().nullable()();
+  RealColumn get longitude => real().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   @override

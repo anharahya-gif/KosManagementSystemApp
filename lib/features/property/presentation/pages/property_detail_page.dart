@@ -7,6 +7,8 @@ import 'package:kms/features/property/domain/entities/property_entity.dart';
 import 'package:kms/features/property/domain/entities/room_entity.dart';
 import 'package:kms/features/property/presentation/cubit/property_cubit.dart';
 import 'package:kms/features/property/presentation/cubit/property_state.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:kms/features/property/presentation/pages/add_room_page.dart';
 
 class PropertyDetailPage extends StatefulWidget {
@@ -203,6 +205,70 @@ class _PropertyDetailPageState extends State<PropertyDetailPage> {
               ),
             ],
           ),
+          if (widget.property.latitude != null && widget.property.longitude != null) ...[
+            const Divider(color: Color(0xFF334155), height: 24),
+            Row(
+              children: [
+                const Icon(Icons.explore, color: AppTheme.secondaryColor, size: 16),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    'Koordinat: ${widget.property.latitude!.toStringAsFixed(6)}, ${widget.property.longitude!.toStringAsFixed(6)}',
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Scaffold(
+                          appBar: AppBar(
+                            title: Text('LOKASI ${widget.property.name.toUpperCase()}'),
+                          ),
+                          body: FlutterMap(
+                            options: MapOptions(
+                              initialCenter: LatLng(widget.property.latitude!, widget.property.longitude!),
+                              initialZoom: 16.0,
+                            ),
+                            children: [
+                              TileLayer(
+                                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                userAgentPackageName: 'com.kms.app',
+                              ),
+                              MarkerLayer(
+                                markers: [
+                                  Marker(
+                                    point: LatLng(widget.property.latitude!, widget.property.longitude!),
+                                    width: 80,
+                                    height: 80,
+                                    child: const Icon(
+                                      Icons.location_on,
+                                      color: Colors.red,
+                                      size: 40,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.map, size: 16, color: AppTheme.secondaryColor),
+                  label: const Text(
+                    'Lihat Peta',
+                    style: TextStyle(
+                      color: AppTheme.secondaryColor,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ]
         ],
       ),
     );

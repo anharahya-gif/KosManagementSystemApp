@@ -19,6 +19,8 @@ class PropertyRepositoryImpl implements PropertyRepository {
       name: row.name,
       address: row.address,
       type: row.type,
+      latitude: row.latitude,
+      longitude: row.longitude,
       createdAt: row.createdAt,
     );
   }
@@ -69,6 +71,8 @@ class PropertyRepositoryImpl implements PropertyRepository {
               name: property.name,
               address: property.address,
               type: property.type,
+              latitude: Value(property.latitude),
+              longitude: Value(property.longitude),
               createdAt: Value(property.createdAt),
             ),
           );
@@ -87,7 +91,8 @@ class PropertyRepositoryImpl implements PropertyRepository {
               organizationId: Value(property.organizationId),
               name: Value(property.name),
               address: Value(property.address),
-              type: Value(property.type),
+              latitude: Value(property.latitude),
+              longitude: Value(property.longitude),
             ),
           );
       return const Success(null);

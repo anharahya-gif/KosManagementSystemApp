@@ -836,6 +836,28 @@ class $PropertiesTable extends Properties
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _latitudeMeta = const VerificationMeta(
+    'latitude',
+  );
+  @override
+  late final GeneratedColumn<double> latitude = GeneratedColumn<double>(
+    'latitude',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _longitudeMeta = const VerificationMeta(
+    'longitude',
+  );
+  @override
+  late final GeneratedColumn<double> longitude = GeneratedColumn<double>(
+    'longitude',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -855,6 +877,8 @@ class $PropertiesTable extends Properties
     name,
     address,
     type,
+    latitude,
+    longitude,
     createdAt,
   ];
   @override
@@ -909,6 +933,18 @@ class $PropertiesTable extends Properties
     } else if (isInserting) {
       context.missing(_typeMeta);
     }
+    if (data.containsKey('latitude')) {
+      context.handle(
+        _latitudeMeta,
+        latitude.isAcceptableOrUnknown(data['latitude']!, _latitudeMeta),
+      );
+    }
+    if (data.containsKey('longitude')) {
+      context.handle(
+        _longitudeMeta,
+        longitude.isAcceptableOrUnknown(data['longitude']!, _longitudeMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -944,6 +980,14 @@ class $PropertiesTable extends Properties
         DriftSqlType.string,
         data['${effectivePrefix}type'],
       )!,
+      latitude: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}latitude'],
+      ),
+      longitude: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}longitude'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -963,6 +1007,8 @@ class Property extends DataClass implements Insertable<Property> {
   final String name;
   final String address;
   final String type;
+  final double? latitude;
+  final double? longitude;
   final DateTime createdAt;
   const Property({
     required this.id,
@@ -970,6 +1016,8 @@ class Property extends DataClass implements Insertable<Property> {
     required this.name,
     required this.address,
     required this.type,
+    this.latitude,
+    this.longitude,
     required this.createdAt,
   });
   @override
@@ -980,6 +1028,12 @@ class Property extends DataClass implements Insertable<Property> {
     map['name'] = Variable<String>(name);
     map['address'] = Variable<String>(address);
     map['type'] = Variable<String>(type);
+    if (!nullToAbsent || latitude != null) {
+      map['latitude'] = Variable<double>(latitude);
+    }
+    if (!nullToAbsent || longitude != null) {
+      map['longitude'] = Variable<double>(longitude);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -991,6 +1045,12 @@ class Property extends DataClass implements Insertable<Property> {
       name: Value(name),
       address: Value(address),
       type: Value(type),
+      latitude: latitude == null && nullToAbsent
+          ? const Value.absent()
+          : Value(latitude),
+      longitude: longitude == null && nullToAbsent
+          ? const Value.absent()
+          : Value(longitude),
       createdAt: Value(createdAt),
     );
   }
@@ -1006,6 +1066,8 @@ class Property extends DataClass implements Insertable<Property> {
       name: serializer.fromJson<String>(json['name']),
       address: serializer.fromJson<String>(json['address']),
       type: serializer.fromJson<String>(json['type']),
+      latitude: serializer.fromJson<double?>(json['latitude']),
+      longitude: serializer.fromJson<double?>(json['longitude']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -1018,6 +1080,8 @@ class Property extends DataClass implements Insertable<Property> {
       'name': serializer.toJson<String>(name),
       'address': serializer.toJson<String>(address),
       'type': serializer.toJson<String>(type),
+      'latitude': serializer.toJson<double?>(latitude),
+      'longitude': serializer.toJson<double?>(longitude),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -1028,6 +1092,8 @@ class Property extends DataClass implements Insertable<Property> {
     String? name,
     String? address,
     String? type,
+    Value<double?> latitude = const Value.absent(),
+    Value<double?> longitude = const Value.absent(),
     DateTime? createdAt,
   }) => Property(
     id: id ?? this.id,
@@ -1035,6 +1101,8 @@ class Property extends DataClass implements Insertable<Property> {
     name: name ?? this.name,
     address: address ?? this.address,
     type: type ?? this.type,
+    latitude: latitude.present ? latitude.value : this.latitude,
+    longitude: longitude.present ? longitude.value : this.longitude,
     createdAt: createdAt ?? this.createdAt,
   );
   Property copyWithCompanion(PropertiesCompanion data) {
@@ -1046,6 +1114,8 @@ class Property extends DataClass implements Insertable<Property> {
       name: data.name.present ? data.name.value : this.name,
       address: data.address.present ? data.address.value : this.address,
       type: data.type.present ? data.type.value : this.type,
+      latitude: data.latitude.present ? data.latitude.value : this.latitude,
+      longitude: data.longitude.present ? data.longitude.value : this.longitude,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -1058,14 +1128,24 @@ class Property extends DataClass implements Insertable<Property> {
           ..write('name: $name, ')
           ..write('address: $address, ')
           ..write('type: $type, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, organizationId, name, address, type, createdAt);
+  int get hashCode => Object.hash(
+    id,
+    organizationId,
+    name,
+    address,
+    type,
+    latitude,
+    longitude,
+    createdAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1075,6 +1155,8 @@ class Property extends DataClass implements Insertable<Property> {
           other.name == this.name &&
           other.address == this.address &&
           other.type == this.type &&
+          other.latitude == this.latitude &&
+          other.longitude == this.longitude &&
           other.createdAt == this.createdAt);
 }
 
@@ -1084,6 +1166,8 @@ class PropertiesCompanion extends UpdateCompanion<Property> {
   final Value<String> name;
   final Value<String> address;
   final Value<String> type;
+  final Value<double?> latitude;
+  final Value<double?> longitude;
   final Value<DateTime> createdAt;
   final Value<int> rowid;
   const PropertiesCompanion({
@@ -1092,6 +1176,8 @@ class PropertiesCompanion extends UpdateCompanion<Property> {
     this.name = const Value.absent(),
     this.address = const Value.absent(),
     this.type = const Value.absent(),
+    this.latitude = const Value.absent(),
+    this.longitude = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -1101,6 +1187,8 @@ class PropertiesCompanion extends UpdateCompanion<Property> {
     required String name,
     required String address,
     required String type,
+    this.latitude = const Value.absent(),
+    this.longitude = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -1114,6 +1202,8 @@ class PropertiesCompanion extends UpdateCompanion<Property> {
     Expression<String>? name,
     Expression<String>? address,
     Expression<String>? type,
+    Expression<double>? latitude,
+    Expression<double>? longitude,
     Expression<DateTime>? createdAt,
     Expression<int>? rowid,
   }) {
@@ -1123,6 +1213,8 @@ class PropertiesCompanion extends UpdateCompanion<Property> {
       if (name != null) 'name': name,
       if (address != null) 'address': address,
       if (type != null) 'type': type,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
       if (createdAt != null) 'created_at': createdAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -1134,6 +1226,8 @@ class PropertiesCompanion extends UpdateCompanion<Property> {
     Value<String>? name,
     Value<String>? address,
     Value<String>? type,
+    Value<double?>? latitude,
+    Value<double?>? longitude,
     Value<DateTime>? createdAt,
     Value<int>? rowid,
   }) {
@@ -1143,6 +1237,8 @@ class PropertiesCompanion extends UpdateCompanion<Property> {
       name: name ?? this.name,
       address: address ?? this.address,
       type: type ?? this.type,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
       createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
     );
@@ -1166,6 +1262,12 @@ class PropertiesCompanion extends UpdateCompanion<Property> {
     if (type.present) {
       map['type'] = Variable<String>(type.value);
     }
+    if (latitude.present) {
+      map['latitude'] = Variable<double>(latitude.value);
+    }
+    if (longitude.present) {
+      map['longitude'] = Variable<double>(longitude.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -1183,6 +1285,8 @@ class PropertiesCompanion extends UpdateCompanion<Property> {
           ..write('name: $name, ')
           ..write('address: $address, ')
           ..write('type: $type, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude, ')
           ..write('createdAt: $createdAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -7535,6 +7639,8 @@ typedef $$PropertiesTableCreateCompanionBuilder =
       required String name,
       required String address,
       required String type,
+      Value<double?> latitude,
+      Value<double?> longitude,
       Value<DateTime> createdAt,
       Value<int> rowid,
     });
@@ -7545,6 +7651,8 @@ typedef $$PropertiesTableUpdateCompanionBuilder =
       Value<String> name,
       Value<String> address,
       Value<String> type,
+      Value<double?> latitude,
+      Value<double?> longitude,
       Value<DateTime> createdAt,
       Value<int> rowid,
     });
@@ -7637,6 +7745,16 @@ class $$PropertiesTableFilterComposer
 
   ColumnFilters<String> get type => $composableBuilder(
     column: $table.type,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get latitude => $composableBuilder(
+    column: $table.latitude,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get longitude => $composableBuilder(
+    column: $table.longitude,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7748,6 +7866,16 @@ class $$PropertiesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get latitude => $composableBuilder(
+    column: $table.latitude,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get longitude => $composableBuilder(
+    column: $table.longitude,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -7797,6 +7925,12 @@ class $$PropertiesTableAnnotationComposer
 
   GeneratedColumn<String> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<double> get latitude =>
+      $composableBuilder(column: $table.latitude, builder: (column) => column);
+
+  GeneratedColumn<double> get longitude =>
+      $composableBuilder(column: $table.longitude, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -7912,6 +8046,8 @@ class $$PropertiesTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<String> address = const Value.absent(),
                 Value<String> type = const Value.absent(),
+                Value<double?> latitude = const Value.absent(),
+                Value<double?> longitude = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PropertiesCompanion(
@@ -7920,6 +8056,8 @@ class $$PropertiesTableTableManager
                 name: name,
                 address: address,
                 type: type,
+                latitude: latitude,
+                longitude: longitude,
                 createdAt: createdAt,
                 rowid: rowid,
               ),
@@ -7930,6 +8068,8 @@ class $$PropertiesTableTableManager
                 required String name,
                 required String address,
                 required String type,
+                Value<double?> latitude = const Value.absent(),
+                Value<double?> longitude = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PropertiesCompanion.insert(
@@ -7938,6 +8078,8 @@ class $$PropertiesTableTableManager
                 name: name,
                 address: address,
                 type: type,
+                latitude: latitude,
+                longitude: longitude,
                 createdAt: createdAt,
                 rowid: rowid,
               ),

@@ -186,6 +186,19 @@ class _PropertiesPageState extends State<PropertiesPage> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+                        if (property.latitude != null && property.longitude != null) ...[
+                          const SizedBox(width: 8),
+                          const Icon(Icons.explore, size: 10, color: AppTheme.secondaryColor),
+                          const SizedBox(width: 2),
+                          const Text(
+                            'MAP',
+                            style: TextStyle(
+                              color: AppTheme.secondaryColor,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                     const SizedBox(height: 2),
