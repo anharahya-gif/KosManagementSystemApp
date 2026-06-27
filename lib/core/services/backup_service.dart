@@ -310,14 +310,28 @@ class BackupService {
   }
 
   Future<int> _importInvoices(List<dynamic> rows) async {
+    final Set<String> usedNumbers = {};
     for (final row in rows) {
       final m = row as Map<String, dynamic>;
+      var invoiceNum = (m['invoice_number'] as String? ?? '').trim();
+      if (invoiceNum.isEmpty) {
+        invoiceNum = 'INV-AUTO-${_parseDateTime(m['created_at'])?.millisecondsSinceEpoch ?? DateTime.now().millisecondsSinceEpoch}-${row.hashCode}';
+      }
+
+      var uniqueInvoiceNum = invoiceNum;
+      int counter = 1;
+      while (usedNumbers.contains(uniqueInvoiceNum)) {
+        uniqueInvoiceNum = '$invoiceNum-$counter';
+        counter++;
+      }
+      usedNumbers.add(uniqueInvoiceNum);
+
       await _db.into(_db.invoices).insert(
             InvoicesCompanion.insert(
               id: m['id'] as String? ?? '',
               organizationId: m['organization_id'] as String? ?? '',
               contractId: m['contract_id'] as String? ?? '',
-              invoiceNumber: m['invoice_number'] as String? ?? '',
+              invoiceNumber: uniqueInvoiceNum,
               dueDate: _parseDateTime(m['due_date']) ?? DateTime.now(),
               amountDue: m['amount_due'] is num ? (m['amount_due'] as num).toInt() : 0,
               amountPaid: Value(m['amount_paid'] is num ? (m['amount_paid'] as num).toInt() : 0),
