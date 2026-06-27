@@ -101,7 +101,12 @@ class BackupService {
       }
 
       final jsonString = await file.readAsString();
-      final data = jsonDecode(jsonString) as Map<String, dynamic>;
+      var data = jsonDecode(jsonString) as Map<String, dynamic>;
+
+      // Auto-migrate data if schemaVersion is older
+      final meta = data['_meta'] as Map<String, dynamic>?;
+      final fileVersion = meta != null ? (meta['schemaVersion'] is num ? (meta['schemaVersion'] as num).toInt() : 1) : 1;
+      data = _migrateBackupData(data, fileVersion, _db.schemaVersion);
 
       int totalRows = 0;
 
@@ -431,6 +436,47 @@ class BackupService {
           );
     }
     return rows.length;
+  }
+
+  Map<String, dynamic> _migrateBackupData(Map<String, dynamic> data, int fileVersion, int currentVersion) {
+    var migratedData = Map<String, dynamic>.from(data);
+    
+    if (fileVersion < 3) {
+      migratedData['roomFacilities'] ??= [];
+      final rooms = migratedData['rooms'] as List<dynamic>? ?? [];
+      final roomFacilities = migratedData['roomFacilities'] as List<dynamic>;
+      
+      for (final room in rooms) {
+        if (room is Map<String, dynamic>) {
+          final roomId = room['id'] as String? ?? '';
+          final facilitiesStr = room['facilities'] as String? ?? '';
+          if (roomId.isNotEmpty && facilitiesStr.isNotEmpty) {
+            final facList = facilitiesStr.split(',');
+            for (final facName in facList) {
+              final trimmedName = facName.trim();
+              if (trimmedName.isNotEmpty) {
+                final alreadyExists = roomFacilities.any((f) => 
+                  f is Map<String, dynamic> && f['room_id'] == roomId && f['name'] == trimmedName
+                );
+                if (!alreadyExists) {
+                  roomFacilities.add({
+                    'id': 'FAC-MIGRATE-${roomId.substring(0, roomId.length > 5 ? 5 : roomId.length)}-${trimmedName.hashCode}',
+                    'room_id': roomId,
+                    'name': trimmedName,
+                    'condition': 'good',
+                    'description': 'Migrasi otomatis dari versi lama',
+                    'created_at': DateTime.now().toIso8601String(),
+                  });
+                }
+              }
+            }
+          }
+        }
+      }
+      fileVersion = 3;
+    }
+    
+    return migratedData;
   }
 }
 
