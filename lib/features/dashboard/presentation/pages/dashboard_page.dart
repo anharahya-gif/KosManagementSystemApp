@@ -7,6 +7,10 @@ import 'package:kms/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:kms/features/auth/presentation/cubit/auth_state.dart';
 import 'package:kms/features/dashboard/presentation/cubit/dashboard_cubit.dart';
 import 'package:kms/features/dashboard/presentation/cubit/dashboard_state.dart';
+import 'package:kms/features/property/presentation/pages/add_property_page.dart';
+import 'package:kms/features/resident/presentation/pages/add_resident_page.dart';
+import 'package:kms/features/contract/presentation/pages/add_contract_page.dart';
+import 'package:kms/features/contract/presentation/pages/invoices_page.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -270,8 +274,10 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget _buildQuickActions() {
     final authState = context.read<AuthCubit>().state;
     bool isOwner = false;
+    String? orgId;
     if (authState is AuthSuccess) {
       isOwner = authState.user.isOwner;
+      orgId = authState.user.organizationId;
     }
 
     return Column(
@@ -285,37 +291,71 @@ class _DashboardPageState extends State<DashboardPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            if (isOwner)
+            if (isOwner && orgId != null)
               _buildActionButton(
                 label: 'Properti',
                 icon: Icons.add_business,
                 color: AppTheme.primaryColor,
-                onTap: () {
-                  // TODO: Navigate to add property
+                onTap: () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AddPropertyPage(organizationId: orgId!),
+                    ),
+                  );
+                  if (result == true || result == null) {
+                    _loadMetrics();
+                  }
                 },
               ),
-            _buildActionButton(
-              label: 'Penghuni',
-              icon: Icons.person_add,
-              color: AppTheme.secondaryColor,
-              onTap: () {
-                // TODO: Navigate to add resident
-              },
-            ),
-            _buildActionButton(
-              label: 'Buat Kontrak',
-              icon: Icons.border_color,
-              color: AppTheme.warningColor,
-              onTap: () {
-                // TODO: Navigate to create contract
-              },
-            ),
+            if (orgId != null)
+              _buildActionButton(
+                label: 'Penghuni',
+                icon: Icons.person_add,
+                color: AppTheme.secondaryColor,
+                onTap: () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AddResidentPage(organizationId: orgId!),
+                    ),
+                  );
+                  if (result == true || result == null) {
+                    _loadMetrics();
+                  }
+                },
+              ),
+            if (orgId != null)
+              _buildActionButton(
+                label: 'Buat Kontrak',
+                icon: Icons.border_color,
+                color: AppTheme.warningColor,
+                onTap: () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AddContractPage(organizationId: orgId!),
+                    ),
+                  );
+                  if (result == true || result == null) {
+                    _loadMetrics();
+                  }
+                },
+              ),
             _buildActionButton(
               label: 'Bayar Sewa',
               icon: Icons.add_card,
               color: AppTheme.accentColor,
-              onTap: () {
-                // TODO: Navigate to record payment
+              onTap: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const InvoicesPage(),
+                  ),
+                );
+                if (result == true || result == null) {
+                  _loadMetrics();
+                }
               },
             ),
           ],
