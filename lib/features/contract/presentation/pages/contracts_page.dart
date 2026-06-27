@@ -407,13 +407,49 @@ class _ContractsPageState extends State<ContractsPage> {
 
   void _showRenewContractDialog(BuildContext context, ContractEntity contract) {
     final currentEndDate = contract.endDate;
-    DateTime newEndDate = currentEndDate.add(const Duration(days: 180)); // 6 bulan kedepan default
+    DateTime newEndDate = currentEndDate.add(const Duration(days: 30)); // 1 bulan default
+    int? selectedMonths = 1;
     
     showDialog(
       context: context,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setStateDialog) {
+            Widget buildDurationChip(String label, int months) {
+              final isSelected = selectedMonths == months;
+              return ChoiceChip(
+                avatar: isSelected
+                    ? const Icon(Icons.check_circle, size: 16, color: Colors.white)
+                    : null,
+                label: Text(label),
+                labelStyle: TextStyle(
+                  fontSize: 12,
+                  color: isSelected ? Colors.white : Colors.black87,
+                ),
+                selected: isSelected,
+                selectedColor: AppTheme.primaryColor,
+                backgroundColor: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  side: BorderSide(
+                    color: isSelected ? AppTheme.primaryColor : Colors.grey.shade400,
+                  ),
+                ),
+                onSelected: (selected) {
+                  if (selected) {
+                    setStateDialog(() {
+                      selectedMonths = months;
+                      newEndDate = DateTime(
+                        currentEndDate.year,
+                        currentEndDate.month + months,
+                        currentEndDate.day,
+                      );
+                    });
+                  }
+                },
+              );
+            }
+
             return AlertDialog(
               title: const Text('Perpanjang Kontrak'),
               content: Column(
@@ -423,7 +459,20 @@ class _ContractsPageState extends State<ContractsPage> {
                   Text('Tanggal berakhir saat ini:\n${DateFormatter.formatDateTimeReadable(currentEndDate)}',
                       style: const TextStyle(fontSize: 13)),
                   const SizedBox(height: 16),
-                  const Text('Pilih Tanggal Berakhir Baru:', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                  const Text('Perpanjang Masa Sewa:', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: [
+                      buildDurationChip('+1 Bln', 1),
+                      buildDurationChip('+3 Bln', 3),
+                      buildDurationChip('+6 Bln', 6),
+                      buildDurationChip('+1 Thn', 12),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('Pilih Tanggal Berakhir Kustom:', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   OutlinedButton(
                     onPressed: () async {
@@ -436,6 +485,7 @@ class _ContractsPageState extends State<ContractsPage> {
                       if (picked != null) {
                         setStateDialog(() {
                           newEndDate = picked;
+                          selectedMonths = null; // Custom date resets preset chips
                         });
                       }
                     },
