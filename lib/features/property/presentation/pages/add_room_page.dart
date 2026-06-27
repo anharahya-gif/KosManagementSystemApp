@@ -25,6 +25,7 @@ class _AddRoomPageState extends State<AddRoomPage> {
   final _priceController = TextEditingController();
   final _buildingController = TextEditingController();
   final _floorController = TextEditingController();
+  final _customFacilityController = TextEditingController();
 
   late PropertyCubit _propertyCubit;
   bool get _isEditMode => widget.roomToEdit != null;
@@ -73,12 +74,25 @@ class _AddRoomPageState extends State<AddRoomPage> {
     }
   }
 
+  void _addCustomFacility() {
+    final text = _customFacilityController.text.trim();
+    if (text.isNotEmpty) {
+      setState(() {
+        if (!_selectedFacilities.contains(text)) {
+          _selectedFacilities.add(text);
+        }
+        _customFacilityController.clear();
+      });
+    }
+  }
+
   @override
   void dispose() {
     _roomNumberController.dispose();
     _priceController.dispose();
     _buildingController.dispose();
     _floorController.dispose();
+    _customFacilityController.dispose();
     super.dispose();
   }
 
@@ -169,28 +183,73 @@ class _AddRoomPageState extends State<AddRoomPage> {
                     'Fasilitas Kamar',
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
                     runSpacing: 4,
-                    children: _availableFacilities.map((facility) {
-                      final isSelected = _selectedFacilities.contains(facility);
-                      return FilterChip(
-                        label: Text(facility),
-                        selected: isSelected,
-                        selectedColor: AppTheme.primaryColor.withValues(alpha: 0.2),
-                        checkmarkColor: AppTheme.primaryColor,
-                        onSelected: (selected) {
-                          setState(() {
-                            if (selected) {
-                              _selectedFacilities.add(facility);
-                            } else {
-                              _selectedFacilities.remove(facility);
-                            }
-                          });
-                        },
-                      );
-                    }).toList(),
+                    children: [
+                      ..._availableFacilities.map((facility) {
+                        final isSelected = _selectedFacilities.contains(facility);
+                        return FilterChip(
+                          label: Text(facility),
+                          selected: isSelected,
+                          selectedColor: AppTheme.primaryColor.withValues(alpha: 0.2),
+                          checkmarkColor: AppTheme.primaryColor,
+                          onSelected: (selected) {
+                            setState(() {
+                              if (selected) {
+                                _selectedFacilities.add(facility);
+                              } else {
+                                _selectedFacilities.remove(facility);
+                              }
+                            });
+                          },
+                        );
+                      }),
+                      ..._selectedFacilities
+                          .where((f) => !_availableFacilities.contains(f))
+                          .map((customFacility) {
+                        return FilterChip(
+                          label: Text(customFacility),
+                          selected: true,
+                          selectedColor: AppTheme.secondaryColor.withValues(alpha: 0.2),
+                          checkmarkColor: AppTheme.secondaryColor,
+                          onSelected: (selected) {
+                            setState(() {
+                              _selectedFacilities.remove(customFacility);
+                            });
+                          },
+                        );
+                      }),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: _customFacilityController,
+                          decoration: const InputDecoration(
+                            labelText: 'Tambah Fasilitas Kustom',
+                            hintText: 'Contoh: Dispenser, Dapur Pribadi',
+                            isDense: true,
+                          ),
+                          onFieldSubmitted: (_) => _addCustomFacility(),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.secondaryColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: _addCustomFacility,
+                        child: const Text('Tambah'),
+                      ),
+                    ],
                   ),
                   const Divider(height: 32),
                   Row(
