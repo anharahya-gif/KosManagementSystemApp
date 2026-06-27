@@ -7,6 +7,7 @@ import 'package:kms/features/auth/presentation/cubit/auth_state.dart';
 import 'package:kms/features/contract/presentation/pages/contracts_page.dart';
 import 'package:kms/features/contract/presentation/pages/invoices_page.dart';
 import 'package:kms/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:kms/features/dashboard/presentation/pages/backup_restore_page.dart';
 import 'package:kms/features/dashboard/presentation/pages/recycle_bin_page.dart';
 import 'package:kms/features/property/presentation/pages/properties_page.dart';
 import 'package:kms/features/resident/presentation/pages/residents_page.dart';
@@ -333,6 +334,19 @@ class _MainScaffoldPageState extends State<MainScaffoldPage> {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Fitur Pengaturan tersedia di Fase 2.')),
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.backup_outlined, color: AppTheme.secondaryColor),
+            title: const Text('Backup & Restore'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const BackupRestorePage(),
+                ),
               );
             },
           ),

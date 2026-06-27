@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:kms/core/database/app_database.dart';
+import 'package:kms/core/services/backup_service.dart';
 import 'package:kms/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:kms/features/property/data/repositories/property_repository_impl.dart';
 import 'package:kms/features/property/domain/repositories/property_repository.dart';
@@ -25,6 +26,9 @@ Future<void> init() async {
   sl.registerLazySingleton<PropertyRepository>(() => PropertyRepositoryImpl(sl()));
   sl.registerLazySingleton<ResidentRepository>(() => ResidentRepositoryImpl(sl()));
   sl.registerLazySingleton<ContractRepository>(() => ContractRepositoryImpl(sl()));
+
+  // 2b. Services
+  sl.registerLazySingleton<BackupService>(() => BackupService(sl()));
 
   // 3. State Management (Cubits)
   sl.registerLazySingleton<AuthCubit>(() => AuthCubit(sl()));
