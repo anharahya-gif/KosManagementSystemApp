@@ -201,7 +201,35 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (m) async {
+          await m.createAll();
+        },
+        onUpgrade: (m, from, to) async {
+          // Recreate database tables on schema change during development
+          final tables = [
+            'organizations',
+            'user_profiles',
+            'properties',
+            'property_managers',
+            'rooms',
+            'residents',
+            'contracts',
+            'invoices',
+            'payments',
+            'payment_items',
+            'maintenance_tickets',
+            'audit_logs',
+          ];
+          for (final table in tables) {
+            await m.deleteTable(table);
+          }
+          await m.createAll();
+        },
+      );
 }
 
 LazyDatabase _openConnection() {
