@@ -182,7 +182,14 @@ class _AddContractPageState extends State<AddContractPage> {
                                 if (picked != null) {
                                   setState(() {
                                     _startDate = picked;
-                                    if (_endDate.isBefore(_startDate)) {
+                                    if (_selectedDurationMonths != null) {
+                                      // Recalculate end date based on selected duration
+                                      _endDate = DateTime(
+                                        _startDate.year,
+                                        _startDate.month + _selectedDurationMonths!,
+                                        _startDate.day,
+                                      );
+                                    } else if (_endDate.isBefore(_startDate)) {
                                       _endDate = _startDate.add(const Duration(days: 30));
                                     }
                                   });
@@ -211,6 +218,7 @@ class _AddContractPageState extends State<AddContractPage> {
                                 if (picked != null) {
                                   setState(() {
                                     _endDate = picked;
+                                    _selectedDurationMonths = null; // manual pick clears chip
                                   });
                                 }
                               },
@@ -219,6 +227,18 @@ class _AddContractPageState extends State<AddContractPage> {
                           ],
                         ),
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  // Quick-add duration chips
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: [
+                      _buildDurationChip('1 Bulan', 1),
+                      _buildDurationChip('3 Bulan', 3),
+                      _buildDurationChip('6 Bulan', 6),
+                      _buildDurationChip('1 Tahun', 12),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -287,5 +307,32 @@ class _AddContractPageState extends State<AddContractPage> {
 
       _contractCubit.addContract(contract);
     }
+  }
+
+  int? _selectedDurationMonths;
+
+  Widget _buildDurationChip(String label, int months) {
+    final isSelected = _selectedDurationMonths == months;
+    return ActionChip(
+      avatar: isSelected
+          ? const Icon(Icons.check_circle, size: 18, color: Colors.white)
+          : const Icon(Icons.schedule, size: 18),
+      label: Text(label),
+      backgroundColor: isSelected ? AppTheme.primaryColor : null,
+      labelStyle: TextStyle(
+        color: isSelected ? Colors.white : null,
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      ),
+      onPressed: () {
+        setState(() {
+          _selectedDurationMonths = months;
+          _endDate = DateTime(
+            _startDate.year,
+            _startDate.month + months,
+            _startDate.day,
+          );
+        });
+      },
+    );
   }
 }
