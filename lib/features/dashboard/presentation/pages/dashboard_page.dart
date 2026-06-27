@@ -13,7 +13,8 @@ import 'package:kms/features/contract/presentation/pages/add_contract_page.dart'
 import 'package:kms/features/contract/presentation/pages/invoices_page.dart';
 
 class DashboardPage extends StatefulWidget {
-  const DashboardPage({super.key});
+  final Function(int)? onSwitchTab;
+  const DashboardPage({super.key, this.onSwitchTab});
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
@@ -347,14 +348,18 @@ class _DashboardPageState extends State<DashboardPage> {
               icon: Icons.add_card,
               color: AppTheme.accentColor,
               onTap: () async {
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const InvoicesPage(),
-                  ),
-                );
-                if (result == true || result == null) {
-                  _loadMetrics();
+                if (widget.onSwitchTab != null) {
+                  widget.onSwitchTab!(4);
+                } else {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const InvoicesPage(),
+                    ),
+                  );
+                  if (result == true || result == null) {
+                    _loadMetrics();
+                  }
                 }
               },
             ),

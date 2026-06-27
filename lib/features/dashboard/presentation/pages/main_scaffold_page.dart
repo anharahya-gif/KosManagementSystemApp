@@ -21,14 +21,23 @@ class MainScaffoldPage extends StatefulWidget {
 
 class _MainScaffoldPageState extends State<MainScaffoldPage> {
   int _currentIndex = 0;
+  late final List<Widget> _pages;
 
-  final List<Widget> _pages = [
-    const DashboardPage(),
-    const PropertiesPage(),
-    const ResidentsPage(),
-    const ContractsPage(),
-    const InvoicesPage(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      DashboardPage(onSwitchTab: (index) {
+        setState(() {
+          _currentIndex = index;
+        });
+      }),
+      const PropertiesPage(),
+      const ResidentsPage(),
+      const ContractsPage(),
+      const InvoicesPage(),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {

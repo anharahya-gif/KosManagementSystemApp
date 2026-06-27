@@ -7,6 +7,7 @@ import 'package:kms/features/property/domain/entities/property_entity.dart';
 import 'package:kms/features/property/domain/entities/room_entity.dart';
 import 'package:kms/features/property/domain/entities/room_facility_entity.dart';
 import 'package:kms/features/property/domain/repositories/property_repository.dart';
+import 'package:uuid/uuid.dart';
 
 class PropertyRepositoryImpl implements PropertyRepository {
   final AppDatabase _db;
@@ -128,7 +129,7 @@ class PropertyRepositoryImpl implements PropertyRepository {
       for (final row in rows) {
         final facQuery = _db.select(_db.roomFacilities)..where((t) => t.roomId.equals(row.id));
         final facRows = await facQuery.get();
-        final facNames = facRows.map((f) => '${f.name} (${RoomFacilityCondition.fromString(f.condition).toReadableString()})').toList();
+        final facNames = facRows.map((f) => f.name).toList();
         
         rooms.add(RoomEntity(
           id: row.id,
@@ -158,7 +159,7 @@ class PropertyRepositoryImpl implements PropertyRepository {
       
       final facQuery = _db.select(_db.roomFacilities)..where((t) => t.roomId.equals(row.id));
       final facRows = await facQuery.get();
-      final facNames = facRows.map((f) => '${f.name} (${RoomFacilityCondition.fromString(f.condition).toReadableString()})').toList();
+      final facNames = facRows.map((f) => f.name).toList();
       
       return Success(RoomEntity(
         id: row.id,
@@ -195,6 +196,20 @@ class PropertyRepositoryImpl implements PropertyRepository {
               createdAt: Value(room.createdAt),
             ),
           );
+
+      // Insert facilities into RoomFacilities table
+      for (final facName in room.facilities) {
+        await _db.into(_db.roomFacilities).insert(
+              RoomFacilitiesCompanion.insert(
+                id: const Uuid().v4(),
+                roomId: room.id,
+                name: facName,
+                condition: 'good',
+                createdAt: Value(DateTime.now()),
+              ),
+            );
+      }
+
       return const Success(null);
     } catch (e) {
       return FailureResult(DatabaseFailure("Gagal membuat kamar baru: $e"));
@@ -217,6 +232,33 @@ class PropertyRepositoryImpl implements PropertyRepository {
               facilities: Value(room.facilities.join(',')),
             ),
           );
+
+      // Sync RoomFacilities table
+      final existingRows = await (_db.select(_db.roomFacilities)..where((t) => t.roomId.equals(room.id))).get();
+      final existingNames = existingRows.map((r) => r.name).toList();
+
+      // Insert new ones
+      for (final facName in room.facilities) {
+        if (!existingNames.contains(facName)) {
+          await _db.into(_db.roomFacilities).insert(
+                RoomFacilitiesCompanion.insert(
+                  id: const Uuid().v4(),
+                  roomId: room.id,
+                  name: facName,
+                  condition: 'good',
+                  createdAt: Value(DateTime.now()),
+                ),
+              );
+        }
+      }
+
+      // Delete removed ones
+      for (final existingRow in existingRows) {
+        if (!room.facilities.contains(existingRow.name)) {
+          await (_db.delete(_db.roomFacilities)..where((t) => t.id.equals(existingRow.id))).go();
+        }
+      }
+
       return const Success(null);
     } catch (e) {
       return FailureResult(DatabaseFailure("Gagal memperbarui data kamar: $e"));
