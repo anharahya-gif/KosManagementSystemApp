@@ -6,6 +6,7 @@ class PropertyEntity {
   final String type; // 'kos', 'kontrakan', 'apartment', 'guesthouse'
   final double? latitude;
   final double? longitude;
+  final DateTime? deletedAt;
   final DateTime createdAt;
 
   const PropertyEntity({
@@ -16,6 +17,7 @@ class PropertyEntity {
     required this.type,
     this.latitude,
     this.longitude,
+    this.deletedAt,
     required this.createdAt,
   });
 }

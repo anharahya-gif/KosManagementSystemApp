@@ -13,4 +13,12 @@ abstract class PropertyRepository {
   Future<Result<void>> createRoom(RoomEntity room);
   Future<Result<void>> updateRoom(RoomEntity room);
   Future<Result<void>> updateRoomStatus(String roomId, RoomStatus status);
+
+  Future<Result<void>> softDeleteProperty(String id);
+  Future<Result<void>> restoreProperty(String id);
+  Future<Result<void>> hardDeleteProperty(String id);
+
+  Future<Result<void>> softDeleteRoom(String id);
+  Future<Result<void>> restoreRoom(String id);
+  Future<Result<void>> hardDeleteRoom(String id);
 }

@@ -94,4 +94,26 @@ class PropertyCubit extends Cubit<PropertyState> {
       emit(PropertyError(result.failureOrNull!.message));
     }
   }
+
+  Future<void> softDeleteProperty(String id, String organizationId) async {
+    emit(PropertyLoading());
+    final result = await _repository.softDeleteProperty(id);
+    if (result.isSuccess) {
+      emit(const PropertyActionSuccess("Properti berhasil dipindahkan ke kotak sampah."));
+      fetchProperties(organizationId);
+    } else {
+      emit(PropertyError(result.failureOrNull!.message));
+    }
+  }
+
+  Future<void> softDeleteRoom(String id, String propertyId) async {
+    emit(PropertyLoading());
+    final result = await _repository.softDeleteRoom(id);
+    if (result.isSuccess) {
+      emit(const PropertyActionSuccess("Kamar berhasil dipindahkan ke kotak sampah."));
+      fetchPropertyDetail(propertyId);
+    } else {
+      emit(PropertyError(result.failureOrNull!.message));
+    }
+  }
 }

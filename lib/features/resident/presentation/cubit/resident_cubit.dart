@@ -39,4 +39,15 @@ class ResidentCubit extends Cubit<ResidentState> {
       emit(ResidentError(result.failureOrNull!.message));
     }
   }
+
+  Future<void> softDeleteResident(String id, String organizationId) async {
+    emit(ResidentLoading());
+    final result = await _repository.softDeleteResident(id);
+    if (result.isSuccess) {
+      emit(const ResidentActionSuccess("Penghuni berhasil dipindahkan ke kotak sampah."));
+      fetchResidents(organizationId);
+    } else {
+      emit(ResidentError(result.failureOrNull!.message));
+    }
+  }
 }

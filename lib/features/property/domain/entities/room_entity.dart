@@ -21,6 +21,7 @@ class RoomEntity {
   final String? floorName;
   final double pricePerMonth; // Real double value for UI (converted from cents in repo)
   final RoomStatus status;
+  final DateTime? deletedAt;
   final DateTime createdAt;
 
   const RoomEntity({
@@ -31,6 +32,7 @@ class RoomEntity {
     this.floorName,
     required this.pricePerMonth,
     required this.status,
+    this.deletedAt,
     required this.createdAt,
   });
 }

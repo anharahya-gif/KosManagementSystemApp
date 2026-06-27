@@ -22,6 +22,7 @@ class ResidentEntity {
   final String? email;
   final String? idCardNumber;
   final ResidentStatus status;
+  final DateTime? deletedAt;
   final DateTime createdAt;
 
   const ResidentEntity({
@@ -33,6 +34,7 @@ class ResidentEntity {
     this.email,
     this.idCardNumber,
     required this.status,
+    this.deletedAt,
     required this.createdAt,
   });
 }

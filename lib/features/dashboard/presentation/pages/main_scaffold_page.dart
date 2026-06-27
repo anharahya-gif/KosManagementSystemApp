@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kms/core/database/app_database.dart';
+import 'package:kms/core/theme/app_theme.dart';
 import 'package:kms/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:kms/features/auth/presentation/cubit/auth_state.dart';
 import 'package:kms/features/contract/presentation/pages/contracts_page.dart';
 import 'package:kms/features/contract/presentation/pages/invoices_page.dart';
 import 'package:kms/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:kms/features/dashboard/presentation/pages/recycle_bin_page.dart';
 import 'package:kms/features/property/presentation/pages/properties_page.dart';
 import 'package:kms/features/resident/presentation/pages/residents_page.dart';
 
@@ -71,6 +73,7 @@ class _MainScaffoldPageState extends State<MainScaffoldPage> {
               duration: const Duration(milliseconds: 300),
               child: _pages[_currentIndex],
             ),
+            drawer: _buildNavigationDrawer(context, user.fullName, user.role.name),
             bottomNavigationBar: BottomNavigationBar(
               currentIndex: _currentIndex,
               type: BottomNavigationBarType.fixed,
@@ -233,6 +236,107 @@ class _MainScaffoldPageState extends State<MainScaffoldPage> {
             );
           },
         ),
+      ),
+    );
+  }
+
+  Widget _buildNavigationDrawer(BuildContext context, String userName, String userRole) {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          UserAccountsDrawerHeader(
+            decoration: BoxDecoration(
+              gradient: AppTheme.primaryGradient,
+            ),
+            accountName: Text(
+              userName,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            accountEmail: Text(
+              'Role: ${userRole.toUpperCase()}',
+              style: const TextStyle(color: Colors.white70, fontSize: 12),
+            ),
+            currentAccountPicture: const CircleAvatar(
+              backgroundColor: Colors.white24,
+              child: Icon(Icons.person, color: Colors.white, size: 36),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.dashboard_outlined),
+            title: const Text('Dashboard'),
+            onTap: () {
+              Navigator.pop(context);
+              setState(() {
+                _currentIndex = 0;
+              });
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.home_work_outlined),
+            title: const Text('Properti'),
+            onTap: () {
+              Navigator.pop(context);
+              setState(() {
+                _currentIndex = 1;
+              });
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.people_alt_outlined),
+            title: const Text('Penghuni'),
+            onTap: () {
+              Navigator.pop(context);
+              setState(() {
+                _currentIndex = 2;
+              });
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.description_outlined),
+            title: const Text('Kontrak Sewa'),
+            onTap: () {
+              Navigator.pop(context);
+              setState(() {
+                _currentIndex = 3;
+              });
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.account_balance_wallet_outlined),
+            title: const Text('Keuangan & Tagihan'),
+            onTap: () {
+              Navigator.pop(context);
+              setState(() {
+                _currentIndex = 4;
+              });
+            },
+          ),
+          const Divider(),
+          ListTile(
+            leading: Icon(Icons.delete_sweep_outlined, color: AppTheme.warningColor),
+            title: const Text('Kotak Sampah / Recycle Bin'),
+            onTap: () {
+              Navigator.pop(context); // close drawer
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const RecycleBinPage(),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.settings_outlined),
+            title: const Text('Pengaturan (Mock)'),
+            onTap: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Fitur Pengaturan tersedia di Fase 2.')),
+              );
+            },
+          ),
+        ],
       ),
     );
   }

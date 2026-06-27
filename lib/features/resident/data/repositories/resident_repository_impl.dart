@@ -20,6 +20,7 @@ class ResidentRepositoryImpl implements ResidentRepository {
       email: row.email,
       idCardNumber: row.idCardNumber,
       status: ResidentStatus.fromString(row.status),
+      deletedAt: row.deletedAt,
       createdAt: row.createdAt,
     );
   }
@@ -28,7 +29,7 @@ class ResidentRepositoryImpl implements ResidentRepository {
   Future<Result<List<ResidentEntity>>> getResidents(String organizationId) async {
     try {
       final query = _db.select(_db.residents)
-        ..where((t) => t.organizationId.equals(organizationId));
+        ..where((t) => t.organizationId.equals(organizationId) & t.deletedAt.isNull());
       final rows = await query.get();
       return Success(rows.map(_toResidentEntity).toList());
     } catch (e) {
@@ -102,6 +103,40 @@ class ResidentRepositoryImpl implements ResidentRepository {
       return const Success(null);
     } catch (e) {
       return FailureResult(DatabaseFailure("Gagal memperbarui status penghuni: $e"));
+    }
+  }
+
+  @override
+  Future<Result<void>> softDeleteResident(String id) async {
+    try {
+      final now = DateTime.now();
+      final query = _db.update(_db.residents)..where((t) => t.id.equals(id));
+      await query.write(ResidentsCompanion(deletedAt: Value(now)));
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(DatabaseFailure("Gagal menghapus penghuni (soft delete): $e"));
+    }
+  }
+
+  @override
+  Future<Result<void>> restoreResident(String id) async {
+    try {
+      final query = _db.update(_db.residents)..where((t) => t.id.equals(id));
+      await query.write(const ResidentsCompanion(deletedAt: Value(null)));
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(DatabaseFailure("Gagal memulihkan data penghuni: $e"));
+    }
+  }
+
+  @override
+  Future<Result<void>> hardDeleteResident(String id) async {
+    try {
+      final query = _db.delete(_db.residents)..where((t) => t.id.equals(id));
+      await query.go();
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(DatabaseFailure("Gagal menghapus permanen penghuni: $e"));
     }
   }
 }

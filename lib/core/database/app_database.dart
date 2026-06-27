@@ -40,6 +40,7 @@ class Properties extends Table {
   TextColumn get type => text()(); // 'kos', 'kontrakan', 'apartment', 'guesthouse'
   RealColumn get latitude => real().nullable()();
   RealColumn get longitude => real().nullable()();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   @override
@@ -66,6 +67,7 @@ class Rooms extends Table {
   TextColumn get floorName => text().nullable()();
   IntColumn get pricePerMonth => integer()(); // in Cents
   TextColumn get status => text().withDefault(const Constant('vacant'))(); // 'vacant', 'occupied', 'reserved', 'maintenance', 'inactive'
+  DateTimeColumn get deletedAt => dateTime().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   @override
@@ -82,6 +84,7 @@ class Residents extends Table {
   TextColumn get email => text().nullable()();
   TextColumn get idCardNumber => text().nullable()();
   TextColumn get status => text().withDefault(const Constant('prospective'))(); // 'prospective', 'active', 'moved', 'checked_out', 'inactive'
+  DateTimeColumn get deletedAt => dateTime().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   @override

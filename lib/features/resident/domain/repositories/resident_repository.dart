@@ -7,4 +7,8 @@ abstract class ResidentRepository {
   Future<Result<void>> createResident(ResidentEntity resident);
   Future<Result<void>> updateResident(ResidentEntity resident);
   Future<Result<void>> updateResidentStatus(String residentId, ResidentStatus status);
+
+  Future<Result<void>> softDeleteResident(String id);
+  Future<Result<void>> restoreResident(String id);
+  Future<Result<void>> hardDeleteResident(String id);
 }

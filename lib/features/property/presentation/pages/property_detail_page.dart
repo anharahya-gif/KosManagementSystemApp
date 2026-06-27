@@ -9,6 +9,8 @@ import 'package:kms/features/property/presentation/cubit/property_cubit.dart';
 import 'package:kms/features/property/presentation/cubit/property_state.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:kms/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:kms/features/auth/presentation/cubit/auth_state.dart';
 import 'package:kms/features/property/presentation/pages/add_room_page.dart';
 
 class PropertyDetailPage extends StatefulWidget {
@@ -57,6 +59,13 @@ class _PropertyDetailPageState extends State<PropertyDetailPage> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(widget.property.name.toUpperCase()),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+              tooltip: 'Hapus Properti',
+              onPressed: () => _confirmDeleteProperty(context),
+            ),
+          ],
         ),
         body: BlocConsumer<PropertyCubit, PropertyState>(
           listener: (context, state) {
@@ -395,9 +404,80 @@ class _PropertyDetailPageState extends State<PropertyDetailPage> {
                   }
                 },
               ),
+              ListTile(
+                leading: const Icon(Icons.delete_outline, color: AppTheme.dangerColor),
+                title: const Text('Hapus Kamar'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _confirmDeleteRoom(context, room);
+                },
+              ),
               const SizedBox(height: 8),
             ],
           ),
+        );
+      },
+    );
+  }
+
+  void _confirmDeleteProperty(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogCtx) {
+        return AlertDialog(
+          title: const Text('Hapus Properti?'),
+          content: Text(
+            'Apakah Anda yakin ingin memindahkan "${widget.property.name}" ke kotak sampah?\n\nKamar-kamar di dalamnya juga akan otomatis dinonaktifkan.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx),
+              child: const Text('Batal'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.dangerColor),
+              onPressed: () {
+                Navigator.pop(dialogCtx); // close dialog
+                final authState = context.read<AuthCubit>().state;
+                if (authState is AuthSuccess) {
+                  _propertyCubit.softDeleteProperty(
+                    widget.property.id,
+                    authState.user.organizationId,
+                  );
+                  Navigator.pop(context); // return to list properties
+                }
+              },
+              child: const Text('Ya, Hapus'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _confirmDeleteRoom(BuildContext context, RoomEntity room) {
+    showDialog(
+      context: context,
+      builder: (dialogCtx) {
+        return AlertDialog(
+          title: const Text('Hapus Kamar?'),
+          content: Text(
+            'Apakah Anda yakin ingin memindahkan "Kamar ${room.roomNumber}" ke kotak sampah?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx),
+              child: const Text('Batal'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.dangerColor),
+              onPressed: () {
+                Navigator.pop(dialogCtx);
+                _propertyCubit.softDeleteRoom(room.id, widget.property.id);
+              },
+              child: const Text('Ya, Hapus'),
+            ),
+          ],
         );
       },
     );

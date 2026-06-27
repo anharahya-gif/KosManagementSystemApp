@@ -12,6 +12,7 @@ import 'package:kms/features/contract/domain/repositories/contract_repository.da
 import 'package:kms/features/contract/presentation/cubit/contract_cubit.dart';
 import 'package:kms/features/contract/presentation/cubit/invoice_cubit.dart';
 import 'package:kms/features/dashboard/presentation/cubit/dashboard_cubit.dart';
+import 'package:kms/features/dashboard/presentation/cubit/recycle_bin_cubit.dart';
 
 final sl = GetIt.instance; // sl stands for Service Locator
 
@@ -32,4 +33,9 @@ Future<void> init() async {
   sl.registerFactory<ContractCubit>(() => ContractCubit(sl()));
   sl.registerFactory<InvoiceCubit>(() => InvoiceCubit(sl()));
   sl.registerFactory<DashboardCubit>(() => DashboardCubit(sl()));
+  sl.registerFactory<RecycleBinCubit>(() => RecycleBinCubit(
+        db: sl(),
+        propertyRepository: sl(),
+        residentRepository: sl(),
+      ));
 }

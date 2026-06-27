@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kms/core/di/injection_container.dart';
+import 'package:kms/core/theme/app_theme.dart';
 import 'package:kms/features/resident/domain/entities/resident_entity.dart';
 import 'package:kms/features/resident/presentation/cubit/resident_cubit.dart';
 import 'package:kms/features/resident/presentation/cubit/resident_state.dart';
@@ -56,6 +57,15 @@ class _AddResidentPageState extends State<AddResidentPage> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(_isEditMode ? 'EDIT DATA PENGHUNI' : 'TAMBAH PENGHUNI'),
+          actions: _isEditMode
+              ? [
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                    tooltip: 'Hapus Penghuni',
+                    onPressed: () => _confirmDeleteResident(context),
+                  ),
+                ]
+              : null,
         ),
         body: BlocConsumer<ResidentCubit, ResidentState>(
           listener: (context, state) {
@@ -173,5 +183,36 @@ class _AddResidentPageState extends State<AddResidentPage> {
         _residentCubit.addResident(resident);
       }
     }
+  }
+
+  void _confirmDeleteResident(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogCtx) {
+        return AlertDialog(
+          title: const Text('Hapus Penghuni?'),
+          content: Text(
+            'Apakah Anda yakin ingin memindahkan "${widget.residentToEdit!.fullName}" ke kotak sampah?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx),
+              child: const Text('Batal'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.dangerColor),
+              onPressed: () {
+                Navigator.pop(dialogCtx); // close dialog
+                _residentCubit.softDeleteResident(
+                  widget.residentToEdit!.id,
+                  widget.organizationId,
+                );
+              },
+              child: const Text('Ya, Hapus'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

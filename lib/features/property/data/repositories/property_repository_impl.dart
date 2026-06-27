@@ -21,6 +21,7 @@ class PropertyRepositoryImpl implements PropertyRepository {
       type: row.type,
       latitude: row.latitude,
       longitude: row.longitude,
+      deletedAt: row.deletedAt,
       createdAt: row.createdAt,
     );
   }
@@ -34,6 +35,7 @@ class PropertyRepositoryImpl implements PropertyRepository {
       floorName: row.floorName,
       pricePerMonth: CurrencyFormatter.toRupiahDouble(row.pricePerMonth),
       status: RoomStatus.fromString(row.status),
+      deletedAt: row.deletedAt,
       createdAt: row.createdAt,
     );
   }
@@ -42,7 +44,7 @@ class PropertyRepositoryImpl implements PropertyRepository {
   Future<Result<List<PropertyEntity>>> getProperties(String organizationId) async {
     try {
       final query = _db.select(_db.properties)
-        ..where((t) => t.organizationId.equals(organizationId));
+        ..where((t) => t.organizationId.equals(organizationId) & t.deletedAt.isNull());
       final rows = await query.get();
       return Success(rows.map(_toPropertyEntity).toList());
     } catch (e) {
@@ -105,7 +107,7 @@ class PropertyRepositoryImpl implements PropertyRepository {
   Future<Result<List<RoomEntity>>> getRooms(String propertyId) async {
     try {
       final query = _db.select(_db.rooms)
-        ..where((t) => t.propertyId.equals(propertyId));
+        ..where((t) => t.propertyId.equals(propertyId) & t.deletedAt.isNull());
       final rows = await query.get();
       return Success(rows.map(_toRoomEntity).toList());
     } catch (e) {
@@ -177,6 +179,95 @@ class PropertyRepositoryImpl implements PropertyRepository {
       return const Success(null);
     } catch (e) {
       return FailureResult(DatabaseFailure("Gagal memperbarui status kamar: $e"));
+    }
+  }
+
+  @override
+  Future<Result<void>> softDeleteProperty(String id) async {
+    try {
+      await _db.transaction(() async {
+        final now = DateTime.now();
+        // 1. Soft delete properti
+        final propQuery = _db.update(_db.properties)..where((t) => t.id.equals(id));
+        await propQuery.write(PropertiesCompanion(deletedAt: Value(now)));
+
+        // 2. Soft delete semua kamar di properti ini
+        final roomQuery = _db.update(_db.rooms)..where((t) => t.propertyId.equals(id));
+        await roomQuery.write(RoomsCompanion(deletedAt: Value(now)));
+      });
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(DatabaseFailure("Gagal menghapus properti (soft delete): $e"));
+    }
+  }
+
+  @override
+  Future<Result<void>> restoreProperty(String id) async {
+    try {
+      await _db.transaction(() async {
+        // 1. Restore properti
+        final propQuery = _db.update(_db.properties)..where((t) => t.id.equals(id));
+        await propQuery.write(const PropertiesCompanion(deletedAt: Value(null)));
+
+        // 2. Restore semua kamar di properti ini
+        final roomQuery = _db.update(_db.rooms)..where((t) => t.propertyId.equals(id));
+        await roomQuery.write(const RoomsCompanion(deletedAt: Value(null)));
+      });
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(DatabaseFailure("Gagal memulihkan properti: $e"));
+    }
+  }
+
+  @override
+  Future<Result<void>> hardDeleteProperty(String id) async {
+    try {
+      await _db.transaction(() async {
+        // Hapus kamar permanen
+        final roomQuery = _db.delete(_db.rooms)..where((t) => t.propertyId.equals(id));
+        await roomQuery.go();
+
+        // Hapus properti permanen
+        final propQuery = _db.delete(_db.properties)..where((t) => t.id.equals(id));
+        await propQuery.go();
+      });
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(DatabaseFailure("Gagal menghapus permanen properti: $e"));
+    }
+  }
+
+  @override
+  Future<Result<void>> softDeleteRoom(String id) async {
+    try {
+      final now = DateTime.now();
+      final query = _db.update(_db.rooms)..where((t) => t.id.equals(id));
+      await query.write(RoomsCompanion(deletedAt: Value(now)));
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(DatabaseFailure("Gagal menghapus kamar (soft delete): $e"));
+    }
+  }
+
+  @override
+  Future<Result<void>> restoreRoom(String id) async {
+    try {
+      final query = _db.update(_db.rooms)..where((t) => t.id.equals(id));
+      await query.write(const RoomsCompanion(deletedAt: Value(null)));
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(DatabaseFailure("Gagal memulihkan kamar: $e"));
+    }
+  }
+
+  @override
+  Future<Result<void>> hardDeleteRoom(String id) async {
+    try {
+      final query = _db.delete(_db.rooms)..where((t) => t.id.equals(id));
+      await query.go();
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(DatabaseFailure("Gagal menghapus permanen kamar: $e"));
     }
   }
 }
