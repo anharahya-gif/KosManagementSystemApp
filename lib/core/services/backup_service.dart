@@ -40,12 +40,36 @@ class BackupService {
     data['maintenanceTickets'] = await _exportTable(_db.maintenanceTickets);
     data['auditLogs'] = await _exportTable(_db.auditLogs);
 
-    // Simpan ke file
-    final dir = await getApplicationDocumentsDirectory();
+    // Simpan ke file (Coba ke folder Downloads jika memungkinkan)
+    Directory? dir;
+    try {
+      if (Platform.isAndroid) {
+        final downloadDir = Directory('/storage/emulated/0/Download');
+        if (await downloadDir.exists()) {
+          dir = downloadDir;
+        } else {
+          dir = await getExternalStorageDirectory();
+        }
+      } else {
+        dir = await getDownloadsDirectory();
+      }
+    } catch (_) {
+      // Fallback jika provider crash
+    }
+    dir ??= await getApplicationDocumentsDirectory();
+
     final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
-    final file = File('${dir.path}/kms_backup_$timestamp.json');
+    var file = File('${dir.path}/kms_backup_$timestamp.json');
     final jsonString = const JsonEncoder.withIndent('  ').convert(data);
-    await file.writeAsString(jsonString);
+
+    try {
+      await file.writeAsString(jsonString);
+    } catch (_) {
+      // Fallback jika tidak ada akses tulis di folder publik (Android Scoped Storage)
+      final fallbackDir = await getApplicationDocumentsDirectory();
+      file = File('${fallbackDir.path}/kms_backup_$timestamp.json');
+      await file.writeAsString(jsonString);
+    }
 
     return file.path;
   }
