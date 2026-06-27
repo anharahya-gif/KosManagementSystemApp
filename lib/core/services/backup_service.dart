@@ -158,6 +158,7 @@ class BackupService {
               id: m['id'] as String,
               organizationId: m['organization_id'] as String,
               fullName: m['full_name'] as String,
+              phoneNumber: m['phone_number'] as String? ?? '',
               email: m['email'] as String,
               role: m['role'] as String,
               createdAt: Value(_parseDateTime(m['created_at']) ?? DateTime.now()),

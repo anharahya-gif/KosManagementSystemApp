@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:kms/core/di/injection_container.dart';
 import 'package:kms/core/services/backup_service.dart';
 import 'package:kms/core/theme/app_theme.dart';
@@ -35,33 +35,30 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
 
       if (!mounted) return;
 
-      // Tawarkan untuk share file
-      final shouldShare = await showDialog<bool>(
+      // Show success dialog with copy path option
+      showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('Ekspor Berhasil!'),
-          content: Text('File backup berhasil disimpan di:\n$filePath\n\nIngin membagikan file ini?'),
+          title: const Text('Ekspor Berhasil! ✅'),
+          content: Text('File backup berhasil disimpan di:\n\n$filePath'),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Tutup'),
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: filePath));
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Path file disalin ke clipboard')),
+                );
+              },
+              child: const Text('Salin Path'),
             ),
             ElevatedButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Bagikan File'),
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('OK'),
             ),
           ],
         ),
       );
-
-      if (shouldShare == true) {
-        await SharePlus.instance.share(
-          ShareParams(
-            files: [XFile(filePath)],
-            text: 'KMS Database Backup',
-          ),
-        );
-      }
     } catch (e) {
       setState(() {
         _isLoading = false;
