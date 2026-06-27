@@ -220,8 +220,8 @@ class _InvoicesPageState extends State<InvoicesPage> with SingleTickerProviderSt
       itemBuilder: (context, index) {
         final inv = invoices[index];
         final isSelected = _selectedInvoices.any((i) => i.id == inv.id);
-        final residentName = _residentNames[inv.contractId] ?? 'Memuat...';
-        final roomNumber = _roomNumbers[inv.contractId] ?? 'Memuat...';
+        final residentName = _residentNames[inv.contractId] ?? (_residentNames.isEmpty ? 'Memuat...' : 'Tanpa Kontrak');
+        final roomNumber = _roomNumbers[inv.contractId] ?? (_roomNumbers.isEmpty ? 'Memuat...' : 'N/A');
         final statusColor = _getStatusColor(inv.status);
 
         return Card(

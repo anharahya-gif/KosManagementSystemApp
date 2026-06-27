@@ -165,8 +165,8 @@ class _ContractsPageState extends State<ContractsPage> {
 
   Widget _buildContractCard(ContractEntity contract) {
     final statusColor = _getStatusColor(contract.status);
-    final residentName = _residentNames[contract.residentId] ?? 'Memuat...';
-    final roomNumber = _roomNumbers[contract.roomId] ?? 'Memuat...';
+    final residentName = _residentNames[contract.residentId] ?? (_residentNames.isEmpty ? 'Memuat...' : 'Tanpa Penghuni');
+    final roomNumber = _roomNumbers[contract.roomId] ?? (_roomNumbers.isEmpty ? 'Memuat...' : 'N/A');
 
     final startDateStr = DateFormatter.toIsoDateString(contract.startDate);
     final endDateStr = DateFormatter.toIsoDateString(contract.endDate);
