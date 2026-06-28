@@ -14,6 +14,7 @@ import 'package:kms/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:kms/features/auth/presentation/cubit/auth_state.dart';
 import 'package:kms/features/property/presentation/pages/add_room_page.dart';
 import 'package:kms/features/property/presentation/pages/room_facilities_page.dart';
+import 'package:kms/features/property/presentation/pages/add_property_page.dart';
 
 class PropertyDetailPage extends StatefulWidget {
   final PropertyEntity property;
@@ -26,16 +27,18 @@ class PropertyDetailPage extends StatefulWidget {
 
 class _PropertyDetailPageState extends State<PropertyDetailPage> {
   late PropertyCubit _propertyCubit;
+  late PropertyEntity _currentProperty;
 
   @override
   void initState() {
     super.initState();
+    _currentProperty = widget.property;
     _propertyCubit = sl<PropertyCubit>();
     _loadRooms();
   }
 
   void _loadRooms() {
-    _propertyCubit.fetchPropertyDetail(widget.property.id);
+    _propertyCubit.fetchPropertyDetail(_currentProperty.id);
   }
 
   Color _getStatusColor(RoomStatus status) {
@@ -54,14 +57,34 @@ class _PropertyDetailPageState extends State<PropertyDetailPage> {
     }
   }
 
+  void _openEditProperty(BuildContext context) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddPropertyPage(
+          organizationId: _currentProperty.organizationId,
+          propertyToEdit: _currentProperty,
+        ),
+      ),
+    );
+    if (result == true) {
+      _loadRooms();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _propertyCubit,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(widget.property.name.toUpperCase()),
+          title: Text(_currentProperty.name.toUpperCase()),
           actions: [
+            IconButton(
+              icon: const Icon(Icons.edit_outlined),
+              tooltip: 'Edit Properti',
+              onPressed: () => _openEditProperty(context),
+            ),
             IconButton(
               icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
               tooltip: 'Hapus Properti',
@@ -83,6 +106,7 @@ class _PropertyDetailPageState extends State<PropertyDetailPage> {
             }
 
             if (state is PropertyDetailLoaded) {
+              _currentProperty = state.property;
               final rooms = state.rooms;
               if (rooms.isEmpty) {
                 return _buildEmptyState(context);
@@ -136,7 +160,7 @@ class _PropertyDetailPageState extends State<PropertyDetailPage> {
             final result = await Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => AddRoomPage(propertyId: widget.property.id),
+                builder: (context) => AddRoomPage(propertyId: _currentProperty.id),
               ),
             );
             if (result == true) {
@@ -196,7 +220,7 @@ class _PropertyDetailPageState extends State<PropertyDetailPage> {
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
-                  widget.property.address,
+                  _currentProperty.address,
                   style: const TextStyle(color: Colors.white70, fontSize: 13),
                 ),
               ),
@@ -207,7 +231,7 @@ class _PropertyDetailPageState extends State<PropertyDetailPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Tipe: ${widget.property.type.toUpperCase()}',
+                'Tipe: ${_currentProperty.type.toUpperCase()}',
                 style: const TextStyle(
                   color: AppTheme.primaryColor,
                   fontWeight: FontWeight.bold,
@@ -216,7 +240,7 @@ class _PropertyDetailPageState extends State<PropertyDetailPage> {
               ),
             ],
           ),
-          if (widget.property.latitude != null && widget.property.longitude != null) ...[
+          if (_currentProperty.latitude != null && _currentProperty.longitude != null) ...[
             const Divider(color: Color(0xFF334155), height: 24),
             Row(
               children: [
@@ -224,7 +248,7 @@ class _PropertyDetailPageState extends State<PropertyDetailPage> {
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    'Koordinat: ${widget.property.latitude!.toStringAsFixed(6)}, ${widget.property.longitude!.toStringAsFixed(6)}',
+                    'Koordinat: ${_currentProperty.latitude!.toStringAsFixed(6)}, ${_currentProperty.longitude!.toStringAsFixed(6)}',
                     style: const TextStyle(color: Colors.white70, fontSize: 12),
                   ),
                 ),
@@ -235,11 +259,11 @@ class _PropertyDetailPageState extends State<PropertyDetailPage> {
                       MaterialPageRoute(
                         builder: (context) => Scaffold(
                           appBar: AppBar(
-                            title: Text('LOKASI ${widget.property.name.toUpperCase()}'),
+                            title: Text('LOKASI ${_currentProperty.name.toUpperCase()}'),
                           ),
                           body: FlutterMap(
                             options: MapOptions(
-                              initialCenter: LatLng(widget.property.latitude!, widget.property.longitude!),
+                              initialCenter: LatLng(_currentProperty.latitude!, _currentProperty.longitude!),
                               initialZoom: 16.0,
                             ),
                             children: [
@@ -250,7 +274,7 @@ class _PropertyDetailPageState extends State<PropertyDetailPage> {
                               MarkerLayer(
                                 markers: [
                                   Marker(
-                                    point: LatLng(widget.property.latitude!, widget.property.longitude!),
+                                    point: LatLng(_currentProperty.latitude!, _currentProperty.longitude!),
                                     width: 80,
                                     height: 80,
                                     child: const Icon(
@@ -491,7 +515,7 @@ class _PropertyDetailPageState extends State<PropertyDetailPage> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => AddRoomPage(
-                        propertyId: widget.property.id,
+                        propertyId: _currentProperty.id,
                         roomToEdit: room,
                       ),
                     ),
@@ -524,7 +548,7 @@ class _PropertyDetailPageState extends State<PropertyDetailPage> {
         return AlertDialog(
           title: const Text('Hapus Properti?'),
           content: Text(
-            'Apakah Anda yakin ingin memindahkan "${widget.property.name}" ke kotak sampah?\n\nKamar-kamar di dalamnya juga akan otomatis dinonaktifkan.',
+            'Apakah Anda yakin ingin memindahkan "${_currentProperty.name}" ke kotak sampah?\n\nKamar-kamar di dalamnya juga akan otomatis dinonaktifkan.',
           ),
           actions: [
             TextButton(
@@ -538,7 +562,7 @@ class _PropertyDetailPageState extends State<PropertyDetailPage> {
                 final authState = context.read<AuthCubit>().state;
                 if (authState is AuthSuccess) {
                   _propertyCubit.softDeleteProperty(
-                    widget.property.id,
+                    _currentProperty.id,
                     authState.user.organizationId,
                   );
                   Navigator.pop(context); // return to list properties

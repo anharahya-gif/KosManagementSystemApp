@@ -6,6 +6,7 @@ import 'package:kms/core/utils/result.dart';
 import 'package:kms/features/property/domain/entities/property_entity.dart';
 import 'package:kms/features/property/domain/entities/room_entity.dart';
 import 'package:kms/features/property/domain/entities/room_facility_entity.dart';
+import 'package:kms/features/property/domain/entities/property_expense_entity.dart';
 import 'package:kms/features/property/domain/repositories/property_repository.dart';
 import 'package:uuid/uuid.dart';
 
@@ -23,6 +24,7 @@ class PropertyRepositoryImpl implements PropertyRepository {
       type: row.type,
       latitude: row.latitude,
       longitude: row.longitude,
+      managerSharePercent: row.managerSharePercent,
       deletedAt: row.deletedAt,
       createdAt: row.createdAt,
     );
@@ -90,6 +92,7 @@ class PropertyRepositoryImpl implements PropertyRepository {
               type: property.type,
               latitude: Value(property.latitude),
               longitude: Value(property.longitude),
+              managerSharePercent: Value(property.managerSharePercent),
               createdAt: Value(property.createdAt),
             ),
           );
@@ -110,6 +113,7 @@ class PropertyRepositoryImpl implements PropertyRepository {
               address: Value(property.address),
               latitude: Value(property.latitude),
               longitude: Value(property.longitude),
+              managerSharePercent: Value(property.managerSharePercent),
             ),
           );
       return const Success(null);
@@ -427,6 +431,65 @@ class PropertyRepositoryImpl implements PropertyRepository {
       return const Success(null);
     } catch (e) {
       return FailureResult(DatabaseFailure("Gagal menghapus fasilitas kamar: $e"));
+    }
+  }
+
+  PropertyExpenseEntity _toPropertyExpenseEntity(PropertyExpense row) {
+    return PropertyExpenseEntity(
+      id: row.id,
+      propertyId: row.propertyId,
+      name: row.name,
+      category: PropertyExpenseCategory.fromString(row.category),
+      amount: CurrencyFormatter.toRupiahDouble(row.amount),
+      expenseDate: row.expenseDate,
+      createdAt: row.createdAt,
+    );
+  }
+
+  @override
+  Future<Result<List<PropertyExpenseEntity>>> getPropertyExpenses(String propertyId, DateTime month) async {
+    try {
+      final startOfMonth = DateTime(month.year, month.month, 1);
+      final endOfMonth = DateTime(month.year, month.month + 1, 1).subtract(const Duration(microseconds: 1));
+      
+      final query = _db.select(_db.propertyExpenses)
+        ..where((t) => t.propertyId.equals(propertyId) & t.expenseDate.isBetweenValues(startOfMonth, endOfMonth))
+        ..orderBy([(t) => OrderingTerm.desc(t.expenseDate)]);
+      final rows = await query.get();
+      return Success(rows.map(_toPropertyExpenseEntity).toList());
+    } catch (e) {
+      return FailureResult(DatabaseFailure("Gagal mengambil biaya pengeluaran: $e"));
+    }
+  }
+
+  @override
+  Future<Result<void>> addPropertyExpense(PropertyExpenseEntity expense) async {
+    try {
+      await _db.into(_db.propertyExpenses).insert(
+            PropertyExpensesCompanion.insert(
+              id: expense.id,
+              propertyId: expense.propertyId,
+              name: expense.name,
+              category: expense.category.toDbValue(),
+              amount: CurrencyFormatter.toCents(expense.amount),
+              expenseDate: expense.expenseDate,
+              createdAt: Value(expense.createdAt),
+            ),
+          );
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(DatabaseFailure("Gagal menambah biaya pengeluaran: $e"));
+    }
+  }
+
+  @override
+  Future<Result<void>> deletePropertyExpense(String id) async {
+    try {
+      final query = _db.delete(_db.propertyExpenses)..where((t) => t.id.equals(id));
+      await query.go();
+      return const Success(null);
+    } catch (e) {
+      return FailureResult(DatabaseFailure("Gagal menghapus biaya pengeluaran: $e"));
     }
   }
 }

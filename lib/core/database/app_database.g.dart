@@ -858,6 +858,17 @@ class $PropertiesTable extends Properties
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _managerSharePercentMeta =
+      const VerificationMeta('managerSharePercent');
+  @override
+  late final GeneratedColumn<int> managerSharePercent = GeneratedColumn<int>(
+    'manager_share_percent',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(10),
+  );
   static const VerificationMeta _deletedAtMeta = const VerificationMeta(
     'deletedAt',
   );
@@ -890,6 +901,7 @@ class $PropertiesTable extends Properties
     type,
     latitude,
     longitude,
+    managerSharePercent,
     deletedAt,
     createdAt,
   ];
@@ -957,6 +969,15 @@ class $PropertiesTable extends Properties
         longitude.isAcceptableOrUnknown(data['longitude']!, _longitudeMeta),
       );
     }
+    if (data.containsKey('manager_share_percent')) {
+      context.handle(
+        _managerSharePercentMeta,
+        managerSharePercent.isAcceptableOrUnknown(
+          data['manager_share_percent']!,
+          _managerSharePercentMeta,
+        ),
+      );
+    }
     if (data.containsKey('deleted_at')) {
       context.handle(
         _deletedAtMeta,
@@ -1006,6 +1027,10 @@ class $PropertiesTable extends Properties
         DriftSqlType.double,
         data['${effectivePrefix}longitude'],
       ),
+      managerSharePercent: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}manager_share_percent'],
+      )!,
       deletedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}deleted_at'],
@@ -1031,6 +1056,7 @@ class Property extends DataClass implements Insertable<Property> {
   final String type;
   final double? latitude;
   final double? longitude;
+  final int managerSharePercent;
   final DateTime? deletedAt;
   final DateTime createdAt;
   const Property({
@@ -1041,6 +1067,7 @@ class Property extends DataClass implements Insertable<Property> {
     required this.type,
     this.latitude,
     this.longitude,
+    required this.managerSharePercent,
     this.deletedAt,
     required this.createdAt,
   });
@@ -1058,6 +1085,7 @@ class Property extends DataClass implements Insertable<Property> {
     if (!nullToAbsent || longitude != null) {
       map['longitude'] = Variable<double>(longitude);
     }
+    map['manager_share_percent'] = Variable<int>(managerSharePercent);
     if (!nullToAbsent || deletedAt != null) {
       map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
@@ -1078,6 +1106,7 @@ class Property extends DataClass implements Insertable<Property> {
       longitude: longitude == null && nullToAbsent
           ? const Value.absent()
           : Value(longitude),
+      managerSharePercent: Value(managerSharePercent),
       deletedAt: deletedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(deletedAt),
@@ -1098,6 +1127,9 @@ class Property extends DataClass implements Insertable<Property> {
       type: serializer.fromJson<String>(json['type']),
       latitude: serializer.fromJson<double?>(json['latitude']),
       longitude: serializer.fromJson<double?>(json['longitude']),
+      managerSharePercent: serializer.fromJson<int>(
+        json['managerSharePercent'],
+      ),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
@@ -1113,6 +1145,7 @@ class Property extends DataClass implements Insertable<Property> {
       'type': serializer.toJson<String>(type),
       'latitude': serializer.toJson<double?>(latitude),
       'longitude': serializer.toJson<double?>(longitude),
+      'managerSharePercent': serializer.toJson<int>(managerSharePercent),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
@@ -1126,6 +1159,7 @@ class Property extends DataClass implements Insertable<Property> {
     String? type,
     Value<double?> latitude = const Value.absent(),
     Value<double?> longitude = const Value.absent(),
+    int? managerSharePercent,
     Value<DateTime?> deletedAt = const Value.absent(),
     DateTime? createdAt,
   }) => Property(
@@ -1136,6 +1170,7 @@ class Property extends DataClass implements Insertable<Property> {
     type: type ?? this.type,
     latitude: latitude.present ? latitude.value : this.latitude,
     longitude: longitude.present ? longitude.value : this.longitude,
+    managerSharePercent: managerSharePercent ?? this.managerSharePercent,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
     createdAt: createdAt ?? this.createdAt,
   );
@@ -1150,6 +1185,9 @@ class Property extends DataClass implements Insertable<Property> {
       type: data.type.present ? data.type.value : this.type,
       latitude: data.latitude.present ? data.latitude.value : this.latitude,
       longitude: data.longitude.present ? data.longitude.value : this.longitude,
+      managerSharePercent: data.managerSharePercent.present
+          ? data.managerSharePercent.value
+          : this.managerSharePercent,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
@@ -1165,6 +1203,7 @@ class Property extends DataClass implements Insertable<Property> {
           ..write('type: $type, ')
           ..write('latitude: $latitude, ')
           ..write('longitude: $longitude, ')
+          ..write('managerSharePercent: $managerSharePercent, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
@@ -1180,6 +1219,7 @@ class Property extends DataClass implements Insertable<Property> {
     type,
     latitude,
     longitude,
+    managerSharePercent,
     deletedAt,
     createdAt,
   );
@@ -1194,6 +1234,7 @@ class Property extends DataClass implements Insertable<Property> {
           other.type == this.type &&
           other.latitude == this.latitude &&
           other.longitude == this.longitude &&
+          other.managerSharePercent == this.managerSharePercent &&
           other.deletedAt == this.deletedAt &&
           other.createdAt == this.createdAt);
 }
@@ -1206,6 +1247,7 @@ class PropertiesCompanion extends UpdateCompanion<Property> {
   final Value<String> type;
   final Value<double?> latitude;
   final Value<double?> longitude;
+  final Value<int> managerSharePercent;
   final Value<DateTime?> deletedAt;
   final Value<DateTime> createdAt;
   final Value<int> rowid;
@@ -1217,6 +1259,7 @@ class PropertiesCompanion extends UpdateCompanion<Property> {
     this.type = const Value.absent(),
     this.latitude = const Value.absent(),
     this.longitude = const Value.absent(),
+    this.managerSharePercent = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -1229,6 +1272,7 @@ class PropertiesCompanion extends UpdateCompanion<Property> {
     required String type,
     this.latitude = const Value.absent(),
     this.longitude = const Value.absent(),
+    this.managerSharePercent = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -1245,6 +1289,7 @@ class PropertiesCompanion extends UpdateCompanion<Property> {
     Expression<String>? type,
     Expression<double>? latitude,
     Expression<double>? longitude,
+    Expression<int>? managerSharePercent,
     Expression<DateTime>? deletedAt,
     Expression<DateTime>? createdAt,
     Expression<int>? rowid,
@@ -1257,6 +1302,8 @@ class PropertiesCompanion extends UpdateCompanion<Property> {
       if (type != null) 'type': type,
       if (latitude != null) 'latitude': latitude,
       if (longitude != null) 'longitude': longitude,
+      if (managerSharePercent != null)
+        'manager_share_percent': managerSharePercent,
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (createdAt != null) 'created_at': createdAt,
       if (rowid != null) 'rowid': rowid,
@@ -1271,6 +1318,7 @@ class PropertiesCompanion extends UpdateCompanion<Property> {
     Value<String>? type,
     Value<double?>? latitude,
     Value<double?>? longitude,
+    Value<int>? managerSharePercent,
     Value<DateTime?>? deletedAt,
     Value<DateTime>? createdAt,
     Value<int>? rowid,
@@ -1283,6 +1331,7 @@ class PropertiesCompanion extends UpdateCompanion<Property> {
       type: type ?? this.type,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
+      managerSharePercent: managerSharePercent ?? this.managerSharePercent,
       deletedAt: deletedAt ?? this.deletedAt,
       createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
@@ -1313,6 +1362,9 @@ class PropertiesCompanion extends UpdateCompanion<Property> {
     if (longitude.present) {
       map['longitude'] = Variable<double>(longitude.value);
     }
+    if (managerSharePercent.present) {
+      map['manager_share_percent'] = Variable<int>(managerSharePercent.value);
+    }
     if (deletedAt.present) {
       map['deleted_at'] = Variable<DateTime>(deletedAt.value);
     }
@@ -1335,6 +1387,7 @@ class PropertiesCompanion extends UpdateCompanion<Property> {
           ..write('type: $type, ')
           ..write('latitude: $latitude, ')
           ..write('longitude: $longitude, ')
+          ..write('managerSharePercent: $managerSharePercent, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('createdAt: $createdAt, ')
           ..write('rowid: $rowid')
@@ -6554,6 +6607,474 @@ class RoomFacilitiesCompanion extends UpdateCompanion<RoomFacility> {
   }
 }
 
+class $PropertyExpensesTable extends PropertyExpenses
+    with TableInfo<$PropertyExpensesTable, PropertyExpense> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PropertyExpensesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _propertyIdMeta = const VerificationMeta(
+    'propertyId',
+  );
+  @override
+  late final GeneratedColumn<String> propertyId = GeneratedColumn<String>(
+    'property_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES properties (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+    'category',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<int> amount = GeneratedColumn<int>(
+    'amount',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _expenseDateMeta = const VerificationMeta(
+    'expenseDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> expenseDate = GeneratedColumn<DateTime>(
+    'expense_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    propertyId,
+    name,
+    category,
+    amount,
+    expenseDate,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'property_expenses';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PropertyExpense> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('property_id')) {
+      context.handle(
+        _propertyIdMeta,
+        propertyId.isAcceptableOrUnknown(data['property_id']!, _propertyIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_propertyIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(
+        _amountMeta,
+        amount.isAcceptableOrUnknown(data['amount']!, _amountMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_amountMeta);
+    }
+    if (data.containsKey('expense_date')) {
+      context.handle(
+        _expenseDateMeta,
+        expenseDate.isAcceptableOrUnknown(
+          data['expense_date']!,
+          _expenseDateMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_expenseDateMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PropertyExpense map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PropertyExpense(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      propertyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}property_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      )!,
+      amount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}amount'],
+      )!,
+      expenseDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}expense_date'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $PropertyExpensesTable createAlias(String alias) {
+    return $PropertyExpensesTable(attachedDatabase, alias);
+  }
+}
+
+class PropertyExpense extends DataClass implements Insertable<PropertyExpense> {
+  final String id;
+  final String propertyId;
+  final String name;
+  final String category;
+  final int amount;
+  final DateTime expenseDate;
+  final DateTime createdAt;
+  const PropertyExpense({
+    required this.id,
+    required this.propertyId,
+    required this.name,
+    required this.category,
+    required this.amount,
+    required this.expenseDate,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['property_id'] = Variable<String>(propertyId);
+    map['name'] = Variable<String>(name);
+    map['category'] = Variable<String>(category);
+    map['amount'] = Variable<int>(amount);
+    map['expense_date'] = Variable<DateTime>(expenseDate);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  PropertyExpensesCompanion toCompanion(bool nullToAbsent) {
+    return PropertyExpensesCompanion(
+      id: Value(id),
+      propertyId: Value(propertyId),
+      name: Value(name),
+      category: Value(category),
+      amount: Value(amount),
+      expenseDate: Value(expenseDate),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory PropertyExpense.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PropertyExpense(
+      id: serializer.fromJson<String>(json['id']),
+      propertyId: serializer.fromJson<String>(json['propertyId']),
+      name: serializer.fromJson<String>(json['name']),
+      category: serializer.fromJson<String>(json['category']),
+      amount: serializer.fromJson<int>(json['amount']),
+      expenseDate: serializer.fromJson<DateTime>(json['expenseDate']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'propertyId': serializer.toJson<String>(propertyId),
+      'name': serializer.toJson<String>(name),
+      'category': serializer.toJson<String>(category),
+      'amount': serializer.toJson<int>(amount),
+      'expenseDate': serializer.toJson<DateTime>(expenseDate),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  PropertyExpense copyWith({
+    String? id,
+    String? propertyId,
+    String? name,
+    String? category,
+    int? amount,
+    DateTime? expenseDate,
+    DateTime? createdAt,
+  }) => PropertyExpense(
+    id: id ?? this.id,
+    propertyId: propertyId ?? this.propertyId,
+    name: name ?? this.name,
+    category: category ?? this.category,
+    amount: amount ?? this.amount,
+    expenseDate: expenseDate ?? this.expenseDate,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  PropertyExpense copyWithCompanion(PropertyExpensesCompanion data) {
+    return PropertyExpense(
+      id: data.id.present ? data.id.value : this.id,
+      propertyId: data.propertyId.present
+          ? data.propertyId.value
+          : this.propertyId,
+      name: data.name.present ? data.name.value : this.name,
+      category: data.category.present ? data.category.value : this.category,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      expenseDate: data.expenseDate.present
+          ? data.expenseDate.value
+          : this.expenseDate,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PropertyExpense(')
+          ..write('id: $id, ')
+          ..write('propertyId: $propertyId, ')
+          ..write('name: $name, ')
+          ..write('category: $category, ')
+          ..write('amount: $amount, ')
+          ..write('expenseDate: $expenseDate, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    propertyId,
+    name,
+    category,
+    amount,
+    expenseDate,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PropertyExpense &&
+          other.id == this.id &&
+          other.propertyId == this.propertyId &&
+          other.name == this.name &&
+          other.category == this.category &&
+          other.amount == this.amount &&
+          other.expenseDate == this.expenseDate &&
+          other.createdAt == this.createdAt);
+}
+
+class PropertyExpensesCompanion extends UpdateCompanion<PropertyExpense> {
+  final Value<String> id;
+  final Value<String> propertyId;
+  final Value<String> name;
+  final Value<String> category;
+  final Value<int> amount;
+  final Value<DateTime> expenseDate;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const PropertyExpensesCompanion({
+    this.id = const Value.absent(),
+    this.propertyId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.category = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.expenseDate = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PropertyExpensesCompanion.insert({
+    required String id,
+    required String propertyId,
+    required String name,
+    required String category,
+    required int amount,
+    required DateTime expenseDate,
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       propertyId = Value(propertyId),
+       name = Value(name),
+       category = Value(category),
+       amount = Value(amount),
+       expenseDate = Value(expenseDate);
+  static Insertable<PropertyExpense> custom({
+    Expression<String>? id,
+    Expression<String>? propertyId,
+    Expression<String>? name,
+    Expression<String>? category,
+    Expression<int>? amount,
+    Expression<DateTime>? expenseDate,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (propertyId != null) 'property_id': propertyId,
+      if (name != null) 'name': name,
+      if (category != null) 'category': category,
+      if (amount != null) 'amount': amount,
+      if (expenseDate != null) 'expense_date': expenseDate,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PropertyExpensesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? propertyId,
+    Value<String>? name,
+    Value<String>? category,
+    Value<int>? amount,
+    Value<DateTime>? expenseDate,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return PropertyExpensesCompanion(
+      id: id ?? this.id,
+      propertyId: propertyId ?? this.propertyId,
+      name: name ?? this.name,
+      category: category ?? this.category,
+      amount: amount ?? this.amount,
+      expenseDate: expenseDate ?? this.expenseDate,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (propertyId.present) {
+      map['property_id'] = Variable<String>(propertyId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<int>(amount.value);
+    }
+    if (expenseDate.present) {
+      map['expense_date'] = Variable<DateTime>(expenseDate.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PropertyExpensesCompanion(')
+          ..write('id: $id, ')
+          ..write('propertyId: $propertyId, ')
+          ..write('name: $name, ')
+          ..write('category: $category, ')
+          ..write('amount: $amount, ')
+          ..write('expenseDate: $expenseDate, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -6573,6 +7094,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $MaintenanceTicketsTable(this);
   late final $AuditLogsTable auditLogs = $AuditLogsTable(this);
   late final $RoomFacilitiesTable roomFacilities = $RoomFacilitiesTable(this);
+  late final $PropertyExpensesTable propertyExpenses = $PropertyExpensesTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -6591,6 +7115,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     maintenanceTickets,
     auditLogs,
     roomFacilities,
+    propertyExpenses,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -6691,6 +7216,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('room_facilities', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'properties',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('property_expenses', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -8308,6 +8840,7 @@ typedef $$PropertiesTableCreateCompanionBuilder =
       required String type,
       Value<double?> latitude,
       Value<double?> longitude,
+      Value<int> managerSharePercent,
       Value<DateTime?> deletedAt,
       Value<DateTime> createdAt,
       Value<int> rowid,
@@ -8321,6 +8854,7 @@ typedef $$PropertiesTableUpdateCompanionBuilder =
       Value<String> type,
       Value<double?> latitude,
       Value<double?> longitude,
+      Value<int> managerSharePercent,
       Value<DateTime?> deletedAt,
       Value<DateTime> createdAt,
       Value<int> rowid,
@@ -8386,6 +8920,26 @@ final class $$PropertiesTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$PropertyExpensesTable, List<PropertyExpense>>
+  _propertyExpensesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.propertyExpenses,
+    aliasName: 'properties__id__property_expenses__property_id',
+  );
+
+  $$PropertyExpensesTableProcessedTableManager get propertyExpensesRefs {
+    final manager = $$PropertyExpensesTableTableManager(
+      $_db,
+      $_db.propertyExpenses,
+    ).filter((f) => f.propertyId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _propertyExpensesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$PropertiesTableFilterComposer
@@ -8424,6 +8978,11 @@ class $$PropertiesTableFilterComposer
 
   ColumnFilters<double> get longitude => $composableBuilder(
     column: $table.longitude,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get managerSharePercent => $composableBuilder(
+    column: $table.managerSharePercent,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -8509,6 +9068,31 @@ class $$PropertiesTableFilterComposer
     );
     return f(composer);
   }
+
+  Expression<bool> propertyExpensesRefs(
+    Expression<bool> Function($$PropertyExpensesTableFilterComposer f) f,
+  ) {
+    final $$PropertyExpensesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.propertyExpenses,
+      getReferencedColumn: (t) => t.propertyId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PropertyExpensesTableFilterComposer(
+            $db: $db,
+            $table: $db.propertyExpenses,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$PropertiesTableOrderingComposer
@@ -8547,6 +9131,11 @@ class $$PropertiesTableOrderingComposer
 
   ColumnOrderings<double> get longitude => $composableBuilder(
     column: $table.longitude,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get managerSharePercent => $composableBuilder(
+    column: $table.managerSharePercent,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -8610,6 +9199,11 @@ class $$PropertiesTableAnnotationComposer
 
   GeneratedColumn<double> get longitude =>
       $composableBuilder(column: $table.longitude, builder: (column) => column);
+
+  GeneratedColumn<int> get managerSharePercent => $composableBuilder(
+    column: $table.managerSharePercent,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get deletedAt =>
       $composableBuilder(column: $table.deletedAt, builder: (column) => column);
@@ -8689,6 +9283,31 @@ class $$PropertiesTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> propertyExpensesRefs<T extends Object>(
+    Expression<T> Function($$PropertyExpensesTableAnnotationComposer a) f,
+  ) {
+    final $$PropertyExpensesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.propertyExpenses,
+      getReferencedColumn: (t) => t.propertyId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PropertyExpensesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.propertyExpenses,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$PropertiesTableTableManager
@@ -8708,6 +9327,7 @@ class $$PropertiesTableTableManager
             bool organizationId,
             bool propertyManagersRefs,
             bool roomsRefs,
+            bool propertyExpensesRefs,
           })
         > {
   $$PropertiesTableTableManager(_$AppDatabase db, $PropertiesTable table)
@@ -8730,6 +9350,7 @@ class $$PropertiesTableTableManager
                 Value<String> type = const Value.absent(),
                 Value<double?> latitude = const Value.absent(),
                 Value<double?> longitude = const Value.absent(),
+                Value<int> managerSharePercent = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -8741,6 +9362,7 @@ class $$PropertiesTableTableManager
                 type: type,
                 latitude: latitude,
                 longitude: longitude,
+                managerSharePercent: managerSharePercent,
                 deletedAt: deletedAt,
                 createdAt: createdAt,
                 rowid: rowid,
@@ -8754,6 +9376,7 @@ class $$PropertiesTableTableManager
                 required String type,
                 Value<double?> latitude = const Value.absent(),
                 Value<double?> longitude = const Value.absent(),
+                Value<int> managerSharePercent = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -8765,6 +9388,7 @@ class $$PropertiesTableTableManager
                 type: type,
                 latitude: latitude,
                 longitude: longitude,
+                managerSharePercent: managerSharePercent,
                 deletedAt: deletedAt,
                 createdAt: createdAt,
                 rowid: rowid,
@@ -8782,12 +9406,14 @@ class $$PropertiesTableTableManager
                 organizationId = false,
                 propertyManagersRefs = false,
                 roomsRefs = false,
+                propertyExpensesRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (propertyManagersRefs) db.propertyManagers,
                     if (roomsRefs) db.rooms,
+                    if (propertyExpensesRefs) db.propertyExpenses,
                   ],
                   addJoins:
                       <
@@ -8866,6 +9492,27 @@ class $$PropertiesTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (propertyExpensesRefs)
+                        await $_getPrefetchedData<
+                          Property,
+                          $PropertiesTable,
+                          PropertyExpense
+                        >(
+                          currentTable: table,
+                          referencedTable: $$PropertiesTableReferences
+                              ._propertyExpensesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$PropertiesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).propertyExpensesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.propertyId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -8890,6 +9537,7 @@ typedef $$PropertiesTableProcessedTableManager =
         bool organizationId,
         bool propertyManagersRefs,
         bool roomsRefs,
+        bool propertyExpensesRefs,
       })
     >;
 typedef $$PropertyManagersTableCreateCompanionBuilder =
@@ -14287,6 +14935,372 @@ typedef $$RoomFacilitiesTableProcessedTableManager =
       RoomFacility,
       PrefetchHooks Function({bool roomId})
     >;
+typedef $$PropertyExpensesTableCreateCompanionBuilder =
+    PropertyExpensesCompanion Function({
+      required String id,
+      required String propertyId,
+      required String name,
+      required String category,
+      required int amount,
+      required DateTime expenseDate,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+typedef $$PropertyExpensesTableUpdateCompanionBuilder =
+    PropertyExpensesCompanion Function({
+      Value<String> id,
+      Value<String> propertyId,
+      Value<String> name,
+      Value<String> category,
+      Value<int> amount,
+      Value<DateTime> expenseDate,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+final class $$PropertyExpensesTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $PropertyExpensesTable, PropertyExpense> {
+  $$PropertyExpensesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $PropertiesTable _propertyIdTable(_$AppDatabase db) => db.properties
+      .createAlias('property_expenses__property_id__properties__id');
+
+  $$PropertiesTableProcessedTableManager get propertyId {
+    final $_column = $_itemColumn<String>('property_id')!;
+
+    final manager = $$PropertiesTableTableManager(
+      $_db,
+      $_db.properties,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_propertyIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$PropertyExpensesTableFilterComposer
+    extends Composer<_$AppDatabase, $PropertyExpensesTable> {
+  $$PropertyExpensesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get expenseDate => $composableBuilder(
+    column: $table.expenseDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$PropertiesTableFilterComposer get propertyId {
+    final $$PropertiesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.propertyId,
+      referencedTable: $db.properties,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PropertiesTableFilterComposer(
+            $db: $db,
+            $table: $db.properties,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PropertyExpensesTableOrderingComposer
+    extends Composer<_$AppDatabase, $PropertyExpensesTable> {
+  $$PropertyExpensesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get expenseDate => $composableBuilder(
+    column: $table.expenseDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$PropertiesTableOrderingComposer get propertyId {
+    final $$PropertiesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.propertyId,
+      referencedTable: $db.properties,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PropertiesTableOrderingComposer(
+            $db: $db,
+            $table: $db.properties,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PropertyExpensesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PropertyExpensesTable> {
+  $$PropertyExpensesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<int> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get expenseDate => $composableBuilder(
+    column: $table.expenseDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$PropertiesTableAnnotationComposer get propertyId {
+    final $$PropertiesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.propertyId,
+      referencedTable: $db.properties,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PropertiesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.properties,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PropertyExpensesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PropertyExpensesTable,
+          PropertyExpense,
+          $$PropertyExpensesTableFilterComposer,
+          $$PropertyExpensesTableOrderingComposer,
+          $$PropertyExpensesTableAnnotationComposer,
+          $$PropertyExpensesTableCreateCompanionBuilder,
+          $$PropertyExpensesTableUpdateCompanionBuilder,
+          (PropertyExpense, $$PropertyExpensesTableReferences),
+          PropertyExpense,
+          PrefetchHooks Function({bool propertyId})
+        > {
+  $$PropertyExpensesTableTableManager(
+    _$AppDatabase db,
+    $PropertyExpensesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PropertyExpensesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PropertyExpensesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PropertyExpensesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> propertyId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> category = const Value.absent(),
+                Value<int> amount = const Value.absent(),
+                Value<DateTime> expenseDate = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PropertyExpensesCompanion(
+                id: id,
+                propertyId: propertyId,
+                name: name,
+                category: category,
+                amount: amount,
+                expenseDate: expenseDate,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String propertyId,
+                required String name,
+                required String category,
+                required int amount,
+                required DateTime expenseDate,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PropertyExpensesCompanion.insert(
+                id: id,
+                propertyId: propertyId,
+                name: name,
+                category: category,
+                amount: amount,
+                expenseDate: expenseDate,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$PropertyExpensesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({propertyId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (propertyId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.propertyId,
+                                referencedTable:
+                                    $$PropertyExpensesTableReferences
+                                        ._propertyIdTable(db),
+                                referencedColumn:
+                                    $$PropertyExpensesTableReferences
+                                        ._propertyIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$PropertyExpensesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PropertyExpensesTable,
+      PropertyExpense,
+      $$PropertyExpensesTableFilterComposer,
+      $$PropertyExpensesTableOrderingComposer,
+      $$PropertyExpensesTableAnnotationComposer,
+      $$PropertyExpensesTableCreateCompanionBuilder,
+      $$PropertyExpensesTableUpdateCompanionBuilder,
+      (PropertyExpense, $$PropertyExpensesTableReferences),
+      PropertyExpense,
+      PrefetchHooks Function({bool propertyId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -14317,4 +15331,6 @@ class $AppDatabaseManager {
       $$AuditLogsTableTableManager(_db, _db.auditLogs);
   $$RoomFacilitiesTableTableManager get roomFacilities =>
       $$RoomFacilitiesTableTableManager(_db, _db.roomFacilities);
+  $$PropertyExpensesTableTableManager get propertyExpenses =>
+      $$PropertyExpensesTableTableManager(_db, _db.propertyExpenses);
 }

@@ -6,6 +6,7 @@ class PropertyEntity {
   final String type; // 'kos', 'kontrakan', 'apartment', 'guesthouse'
   final double? latitude;
   final double? longitude;
+  final int managerSharePercent;
   final DateTime? deletedAt;
   final DateTime createdAt;
 
@@ -17,6 +18,7 @@ class PropertyEntity {
     required this.type,
     this.latitude,
     this.longitude,
+    this.managerSharePercent = 10,
     this.deletedAt,
     required this.createdAt,
   });

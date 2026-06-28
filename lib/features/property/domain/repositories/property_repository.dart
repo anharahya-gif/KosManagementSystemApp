@@ -2,6 +2,7 @@ import 'package:kms/core/utils/result.dart';
 import 'package:kms/features/property/domain/entities/property_entity.dart';
 import 'package:kms/features/property/domain/entities/room_entity.dart';
 import 'package:kms/features/property/domain/entities/room_facility_entity.dart';
+import 'package:kms/features/property/domain/entities/property_expense_entity.dart';
 
 abstract class PropertyRepository {
   Future<Result<List<PropertyEntity>>> getProperties(String organizationId);
@@ -27,4 +28,8 @@ abstract class PropertyRepository {
   Future<Result<void>> addRoomFacility(RoomFacilityEntity facility);
   Future<Result<void>> updateRoomFacility(RoomFacilityEntity facility);
   Future<Result<void>> deleteRoomFacility(String id);
+
+  Future<Result<List<PropertyExpenseEntity>>> getPropertyExpenses(String propertyId, DateTime month);
+  Future<Result<void>> addPropertyExpense(PropertyExpenseEntity expense);
+  Future<Result<void>> deletePropertyExpense(String id);
 }

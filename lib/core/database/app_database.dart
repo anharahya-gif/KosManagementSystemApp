@@ -40,6 +40,7 @@ class Properties extends Table {
   TextColumn get type => text()(); // 'kos', 'kontrakan', 'apartment', 'guesthouse'
   RealColumn get latitude => real().nullable()();
   RealColumn get longitude => real().nullable()();
+  IntColumn get managerSharePercent => integer().withDefault(const Constant(10))();
   DateTimeColumn get deletedAt => dateTime().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
@@ -197,7 +198,21 @@ class RoomFacilities extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-// 14. App Database Class
+// 14. Property Expenses Table (Fixed/regular bills like Listrik, Wifi, Air)
+class PropertyExpenses extends Table {
+  TextColumn get id => text()();
+  TextColumn get propertyId => text().references(Properties, #id, onDelete: KeyAction.cascade)();
+  TextColumn get name => text()();
+  TextColumn get category => text()(); // 'electricity', 'wifi', 'water', 'other'
+  IntColumn get amount => integer()(); // in Cents
+  DateTimeColumn get expenseDate => dateTime()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+// 15. App Database Class
 @DriftDatabase(tables: [
   Organizations,
   UserProfiles,
@@ -212,12 +227,13 @@ class RoomFacilities extends Table {
   MaintenanceTickets,
   AuditLogs,
   RoomFacilities,
+  PropertyExpenses,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -240,6 +256,7 @@ class AppDatabase extends _$AppDatabase {
             'maintenance_tickets',
             'audit_logs',
             'room_facilities',
+            'property_expenses',
           ];
           for (final table in tables) {
             await m.deleteTable(table);

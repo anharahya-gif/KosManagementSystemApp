@@ -11,8 +11,13 @@ import 'package:uuid/uuid.dart';
 
 class AddPropertyPage extends StatefulWidget {
   final String organizationId;
+  final PropertyEntity? propertyToEdit;
 
-  const AddPropertyPage({super.key, required this.organizationId});
+  const AddPropertyPage({
+    super.key,
+    required this.organizationId,
+    this.propertyToEdit,
+  });
 
   @override
   State<AddPropertyPage> createState() => _AddPropertyPageState();
@@ -23,16 +28,27 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
   final _nameController = TextEditingController();
   final _addressController = TextEditingController();
   String _selectedType = 'kos';
+  int _managerSharePercent = 10;
 
   double? _latitude;
   double? _longitude;
 
   late PropertyCubit _propertyCubit;
+  bool get _isEditMode => widget.propertyToEdit != null;
 
   @override
   void initState() {
     super.initState();
     _propertyCubit = sl<PropertyCubit>();
+    if (_isEditMode) {
+      final p = widget.propertyToEdit!;
+      _nameController.text = p.name;
+      _addressController.text = p.address;
+      _selectedType = p.type;
+      _latitude = p.latitude;
+      _longitude = p.longitude;
+      _managerSharePercent = p.managerSharePercent;
+    }
   }
 
   @override
@@ -48,7 +64,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
       value: _propertyCubit,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('TAMBAH PROPERTI'),
+          title: Text(_isEditMode ? 'EDIT PROPERTI' : 'TAMBAH PROPERTI'),
         ),
         body: BlocConsumer<PropertyCubit, PropertyState>(
           listener: (context, state) {
@@ -126,6 +142,51 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
                   ),
                   const SizedBox(height: 24),
                   const Text(
+                    'Bagi Hasil Pengelola',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Slider(
+                          value: _managerSharePercent.toDouble(),
+                          min: 0,
+                          max: 100,
+                          divisions: 20,
+                          label: '$_managerSharePercent%',
+                          activeColor: AppTheme.primaryColor,
+                          inactiveColor: Colors.grey.shade700,
+                          onChanged: (val) {
+                            setState(() {
+                              _managerSharePercent = val.round();
+                            });
+                          },
+                        ),
+                      ),
+                      Container(
+                        width: 60,
+                        alignment: Alignment.center,
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: AppTheme.primaryColor),
+                        ),
+                        child: Text(
+                          '$_managerSharePercent%',
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primaryColor),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Persentase pendapatan bersih properti (setelah dikurangi biaya operasional/perbaikan) yang didapatkan oleh Pengelola. Pemilik akan mendapatkan ${100 - _managerSharePercent}%.',
+                    style: TextStyle(fontSize: 11, color: Colors.grey.shade400),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
                     'Titik Koordinat Properti (Opsional)',
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey),
                   ),
@@ -140,7 +201,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
                             width: 20,
                             child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                           )
-                        : const Text('Simpan Properti'),
+                        : Text(_isEditMode ? 'Perbarui Properti' : 'Simpan Properti'),
                   ),
                 ],
               ),
@@ -240,17 +301,22 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
   void _submit() {
     if (_formKey.currentState!.validate()) {
       final property = PropertyEntity(
-        id: const Uuid().v4(),
+        id: _isEditMode ? widget.propertyToEdit!.id : const Uuid().v4(),
         organizationId: widget.organizationId,
         name: _nameController.text.trim(),
         address: _addressController.text.trim(),
         type: _selectedType,
         latitude: _latitude,
         longitude: _longitude,
-        createdAt: DateTime.now(),
+        managerSharePercent: _managerSharePercent,
+        createdAt: _isEditMode ? widget.propertyToEdit!.createdAt : DateTime.now(),
       );
 
-      _propertyCubit.addProperty(property);
+      if (_isEditMode) {
+        _propertyCubit.editProperty(property);
+      } else {
+        _propertyCubit.addProperty(property);
+      }
     }
   }
 }

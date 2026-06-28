@@ -40,6 +40,7 @@ class BackupService {
     data['maintenanceTickets'] = await _exportTable(_db.maintenanceTickets);
     data['auditLogs'] = await _exportTable(_db.auditLogs);
     data['roomFacilities'] = await _exportTable(_db.roomFacilities);
+    data['propertyExpenses'] = await _exportTable(_db.propertyExpenses);
 
     // Simpan ke file (Coba ke folder Downloads jika memungkinkan)
     Directory? dir;
@@ -113,6 +114,7 @@ class BackupService {
       await _db.transaction(() async {
         // 1. Hapus semua data (urutan penting karena foreign key)
         await _db.delete(_db.auditLogs).go();
+        await _db.delete(_db.propertyExpenses).go();
         await _db.delete(_db.roomFacilities).go();
         await _db.delete(_db.paymentItems).go();
         await _db.delete(_db.payments).go();
@@ -140,6 +142,7 @@ class BackupService {
         totalRows += await _importMaintenanceTickets(data['maintenanceTickets'] as List<dynamic>? ?? []);
         totalRows += await _importAuditLogs(data['auditLogs'] as List<dynamic>? ?? []);
         totalRows += await _importRoomFacilities(data['roomFacilities'] as List<dynamic>? ?? []);
+        totalRows += await _importPropertyExpenses(data['propertyExpenses'] as List<dynamic>? ?? []);
       });
 
       return ImportResult(
@@ -226,6 +229,7 @@ class BackupService {
               type: m['type'] as String? ?? '',
               latitude: Value(m['latitude'] is num ? (m['latitude'] as num).toDouble() : null),
               longitude: Value(m['longitude'] is num ? (m['longitude'] as num).toDouble() : null),
+              managerSharePercent: Value(m['manager_share_percent'] is num ? (m['manager_share_percent'] as num).toInt() : 10),
               deletedAt: Value(_parseDateTime(m['deleted_at'])),
               createdAt: Value(_parseDateTime(m['created_at']) ?? DateTime.now()),
             ),
@@ -438,8 +442,27 @@ class BackupService {
     return rows.length;
   }
 
+  Future<int> _importPropertyExpenses(List<dynamic> rows) async {
+    for (final row in rows) {
+      final m = row as Map<String, dynamic>;
+      await _db.into(_db.propertyExpenses).insert(
+            PropertyExpensesCompanion.insert(
+              id: m['id'] as String? ?? '',
+              propertyId: m['property_id'] as String? ?? '',
+              name: m['name'] as String? ?? '',
+              category: m['category'] as String? ?? 'other',
+              amount: m['amount'] is num ? (m['amount'] as num).toInt() : 0,
+              expenseDate: _parseDateTime(m['expense_date']) ?? DateTime.now(),
+              createdAt: Value(_parseDateTime(m['created_at']) ?? DateTime.now()),
+            ),
+          );
+    }
+    return rows.length;
+  }
+
   Map<String, dynamic> _migrateBackupData(Map<String, dynamic> data, int fileVersion, int currentVersion) {
     var migratedData = Map<String, dynamic>.from(data);
+    migratedData['propertyExpenses'] ??= [];
     
     if (fileVersion < 3) {
       migratedData['roomFacilities'] ??= [];
